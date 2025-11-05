@@ -1,0 +1,29 @@
+{
+  "name": "seedigital-ai-performance-appraisal",
+  "version": "1.0.0",
+  "description": "A web-based performance appraisal system for seedigital.ai staff with AI-powered assistance and SharePoint integration",
+  "type": "module",
+  "main": "index.html",
+  "scripts": {
+    "dev": "python -m http.server 8000",
+    "start": "python -m http.server 8000",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "performance-appraisal",
+    "hr",
+    "sharepoint",
+    "azure",
+    "msal",
+    "ai-assistance"
+  ],
+  "author": "seedigital.ai",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://dev.azure.com/seedigitalAI/seedigital-ai-performance-appraisal"
+  },
+  "dependencies": {},
+  "devDependencies": {}
+}
+

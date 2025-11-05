@@ -1,0 +1,1042 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>seedigital.AI Performance Appraisal System</title>
+    
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Load Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- Microsoft Graph SDK for SharePoint integration -->
+    <script src="https://alcdn.msauth.net/browser/2.38.3/js/msal-browser.min.js"></script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+        
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: #f7f9fb; 
+        }
+        
+        .card { 
+            background-color: white; 
+            border-radius: 12px; 
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.06); 
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .btn-primary { 
+            background-color: #10b981; 
+            color: white; 
+            transition: background-color 0.2s; 
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+        }
+        
+        .btn-primary:hover { 
+            background-color: #059669; 
+        }
+        
+        .btn-secondary { 
+            background-color: #f3f4f6; 
+            color: #1f2937; 
+            transition: background-color 0.2s; 
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+        }
+        
+        .btn-secondary:hover { 
+            background-color: #e5e7eb; 
+        }
+        
+        .btn-blue { 
+            background-color: #3b82f6; 
+            color: white; 
+            transition: background-color 0.2s; 
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+        }
+        
+        .btn-blue:hover { 
+            background-color: #2563eb; 
+        }
+        
+        .input-style { 
+            border: 1px solid #d1d5db; 
+            padding: 10px; 
+            border-radius: 8px; 
+            width: 100%; 
+            transition: border-color 0.2s, box-shadow 0.2s; 
+        }
+        
+        .input-style:focus { 
+            border-color: #3b82f6; 
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2); 
+            outline: none; 
+        }
+        
+        textarea { 
+            resize: vertical; 
+            min-height: 100px;
+        }
+        
+        .competency-item {
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            background-color: #f9fafb;
+        }
+        
+        .ai-suggestion {
+            background-color: #eff6ff;
+            border-left: 4px solid #3b82f6;
+            padding: 1rem;
+            margin-top: 0.5rem;
+            border-radius: 4px;
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(59, 130, 246, 0.3);
+            border-radius: 50%;
+            border-top-color: #3b82f6;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .section-header {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #e5e7eb;
+        }
+        
+        .rating-scale {
+            display: flex;
+            gap: 1rem;
+            margin-top: 0.5rem;
+        }
+        
+        .rating-btn {
+            flex: 1;
+            padding: 0.75rem;
+            border: 2px solid #d1d5db;
+            border-radius: 8px;
+            background-color: white;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+        }
+        
+        .rating-btn:hover {
+            border-color: #3b82f6;
+            background-color: #eff6ff;
+        }
+        
+        .rating-btn.active {
+            border-color: #3b82f6;
+            background-color: #3b82f6;
+            color: white;
+        }
+        
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mx-auto px-4 py-8 max-w-6xl">
+        <!-- Header -->
+        <div class="card mb-6">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-800">Performance Appraisal System</h1>
+                    <p class="text-gray-600 mt-2">seedigital.ai Staff Performance Review</p>
+                </div>
+                <div class="flex gap-3">
+                    <button id="saveBtn" class="btn-primary" onclick="saveToSharePoint()">
+                        <i data-lucide="save" class="inline-block w-4 h-4 mr-2"></i>
+                        Save to SharePoint
+                    </button>
+                    <button id="loadBtn" class="btn-secondary" onclick="loadFromSharePoint()">
+                        <i data-lucide="folder-open" class="inline-block w-4 h-4 mr-2"></i>
+                        Load
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Employee Information -->
+        <div class="card">
+            <h2 class="section-header">Employee Information</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Employee Name</label>
+                    <input type="text" id="employeeName" class="input-style" placeholder="Enter employee name">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Employee ID</label>
+                    <input type="text" id="employeeId" class="input-style" placeholder="Enter employee ID">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Department</label>
+                    <input type="text" id="department" class="input-style" placeholder="Enter department">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Manager Name</label>
+                    <input type="text" id="managerName" class="input-style" placeholder="Enter manager name">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Review Period</label>
+                    <input type="text" id="reviewPeriod" class="input-style" placeholder="e.g., Jan 2024 - Jun 2024" value="Jan 2024 - Jun 2024">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Review Date</label>
+                    <input type="date" id="reviewDate" class="input-style">
+                </div>
+            </div>
+        </div>
+
+        <!-- Self-Assessment: Core Competencies -->
+        <div class="card">
+            <h2 class="section-header">Self-Assessment: Core Competencies</h2>
+            <p class="text-gray-600 mb-4">Rate yourself across the following core competencies (1-5 scale: 1=Needs Improvement, 5=Exceeds Expectations)</p>
+            
+            <div id="competenciesContainer">
+                <!-- Competencies will be dynamically added here -->
+            </div>
+            
+            <button class="btn-secondary mt-4" onclick="addCompetency()" id="addCompetencyBtn">
+                <i data-lucide="plus" class="inline-block w-4 h-4 mr-2"></i>
+                Add Competency
+            </button>
+        </div>
+
+        <!-- Self-Reflection: Previous 6 Months -->
+        <div class="card">
+            <h2 class="section-header">Self-Reflection: Previous 6 Months</h2>
+            <p class="text-gray-600 mb-4">Reflect on your performance, achievements, and areas for growth over the past 6 months.</p>
+            
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Key Achievements</label>
+                <textarea id="keyAchievements" class="input-style" placeholder="Describe your key achievements and accomplishments..."></textarea>
+                <button class="btn-secondary mt-2 text-sm" onclick="getAIAssistance('keyAchievements', 'What are your key achievements from the past 6 months?')">
+                    <i data-lucide="sparkles" class="inline-block w-4 h-4 mr-2"></i>
+                    Get AI Assistance
+                </button>
+                <div id="keyAchievementsAI" class="ai-suggestion hidden"></div>
+            </div>
+            
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Challenges and Learnings</label>
+                <textarea id="challengesLearnings" class="input-style" placeholder="Describe challenges faced and key learnings..."></textarea>
+                <button class="btn-secondary mt-2 text-sm" onclick="getAIAssistance('challengesLearnings', 'What challenges did you face and what did you learn?')">
+                    <i data-lucide="sparkles" class="inline-block w-4 h-4 mr-2"></i>
+                    Get AI Assistance
+                </button>
+                <div id="challengesLearningsAI" class="ai-suggestion hidden"></div>
+            </div>
+            
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Areas for Improvement</label>
+                <textarea id="areasForImprovement" class="input-style" placeholder="Identify areas where you would like to improve..."></textarea>
+                <button class="btn-secondary mt-2 text-sm" onclick="getAIAssistance('areasForImprovement', 'What areas would you like to improve?')">
+                    <i data-lucide="sparkles" class="inline-block w-4 h-4 mr-2"></i>
+                    Get AI Assistance
+                </button>
+                <div id="areasForImprovementAI" class="ai-suggestion hidden"></div>
+            </div>
+        </div>
+
+        <!-- Performance Goals: Next 6 Months -->
+        <div class="card">
+            <h2 class="section-header">Performance Goals: Next 6 Months</h2>
+            <p class="text-gray-600 mb-4">Define your performance goals and objectives for the next 6 months.</p>
+            
+            <div id="goalsContainer">
+                <!-- Goals will be dynamically added here -->
+            </div>
+            
+            <button class="btn-secondary mt-4" onclick="addGoal()">
+                <i data-lucide="plus" class="inline-block w-4 h-4 mr-2"></i>
+                Add Goal
+            </button>
+        </div>
+
+        <!-- Manager Assessment -->
+        <div class="card">
+            <h2 class="section-header">Manager Assessment</h2>
+            <p class="text-gray-600 mb-4">Manager's evaluation and feedback (to be completed by manager).</p>
+            
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Overall Performance Rating</label>
+                <div class="rating-scale">
+                    <button class="rating-btn" onclick="setManagerRating(1)">1 - Needs Improvement</button>
+                    <button class="rating-btn" onclick="setManagerRating(2)">2 - Below Expectations</button>
+                    <button class="rating-btn" onclick="setManagerRating(3)">3 - Meets Expectations</button>
+                    <button class="rating-btn" onclick="setManagerRating(4)">4 - Above Expectations</button>
+                    <button class="rating-btn" onclick="setManagerRating(5)">5 - Exceeds Expectations</button>
+                </div>
+                <input type="hidden" id="managerRating" value="">
+            </div>
+            
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Manager's Feedback on Core Competencies</label>
+                <textarea id="managerCompetencyFeedback" class="input-style" placeholder="Provide feedback on each core competency..."></textarea>
+            </div>
+            
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Strengths</label>
+                <textarea id="managerStrengths" class="input-style" placeholder="Identify employee strengths..."></textarea>
+            </div>
+            
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Development Areas</label>
+                <textarea id="managerDevelopmentAreas" class="input-style" placeholder="Identify areas for development..."></textarea>
+            </div>
+            
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Recommendations for Next 6 Months</label>
+                <textarea id="managerRecommendations" class="input-style" placeholder="Provide recommendations for the next review period..."></textarea>
+            </div>
+            
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Manager's Signature</label>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <input type="text" id="managerSignature" class="input-style" placeholder="Manager name">
+                    <input type="date" id="managerSignatureDate" class="input-style">
+                </div>
+            </div>
+        </div>
+
+        <!-- Employee Acknowledgment -->
+        <div class="card">
+            <h2 class="section-header">Employee Acknowledgment</h2>
+            <div class="mb-4">
+                <label class="flex items-center">
+                    <input type="checkbox" id="employeeAcknowledgment" class="mr-2 w-5 h-5">
+                    <span class="text-gray-700">I acknowledge that I have reviewed this performance appraisal and discussed it with my manager.</span>
+                </label>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <input type="text" id="employeeSignature" class="input-style" placeholder="Employee name">
+                <input type="date" id="employeeSignatureDate" class="input-style">
+            </div>
+        </div>
+
+        <!-- Save Status -->
+        <div id="saveStatus" class="hidden fixed bottom-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg">
+            <span id="saveStatusText">Saved successfully!</span>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+
+        // Microsoft Azure AD / MSAL Configuration
+        const msalConfig = {
+            auth: {
+                clientId: 'YOUR_CLIENT_ID', // Replace with your Azure AD App Registration Client ID
+                authority: 'https://login.microsoftonline.com/YOUR_TENANT_ID', // Replace with your tenant ID
+                redirectUri: window.location.origin
+            },
+            cache: {
+                cacheLocation: 'sessionStorage',
+                storeAuthStateInCookie: false
+            }
+        };
+
+        const msalInstance = new msal.PublicClientApplication(msalConfig);
+
+        // SharePoint Configuration
+        const sharePointConfig = {
+            siteUrl: 'YOUR_SHAREPOINT_SITE_URL', // e.g., 'https://yourtenant.sharepoint.com/sites/PerformanceAppraisals'
+            libraryName: 'Performance Appraisals' // SharePoint library name
+        };
+
+        // Default competencies (up to 6)
+        const defaultCompetencies = [
+            'Technical Skills',
+            'Communication',
+            'Teamwork & Collaboration',
+            'Problem Solving',
+            'Leadership',
+            'Innovation & Creativity'
+        ];
+
+        let competencyCount = 0;
+        let goalCount = 0;
+        let managerRatingValue = 0;
+
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeCompetencies();
+            initializeGoals();
+            setReviewDate();
+            
+            // Check for saved data in localStorage
+            loadFromLocalStorage();
+        });
+
+        function setReviewDate() {
+            const today = new Date();
+            const dateStr = today.toISOString().split('T')[0];
+            document.getElementById('reviewDate').value = dateStr;
+        }
+
+        function initializeCompetencies() {
+            const container = document.getElementById('competenciesContainer');
+            container.innerHTML = '';
+            competencyCount = 0;
+            
+            // Add default competencies
+            defaultCompetencies.forEach(competency => {
+                if (competencyCount < 6) {
+                    addCompetency(competency);
+                }
+            });
+        }
+
+        function addCompetency(name = '') {
+            if (competencyCount >= 6) {
+                alert('Maximum of 6 core competencies allowed.');
+                return;
+            }
+
+            const container = document.getElementById('competenciesContainer');
+            const div = document.createElement('div');
+            div.className = 'competency-item';
+            div.id = `competency-${competencyCount}`;
+            
+            div.innerHTML = `
+                <div class="flex justify-between items-start mb-3">
+                    <input type="text" class="input-style flex-1 mr-2" placeholder="Competency name" 
+                           value="${name}" id="competency-name-${competencyCount}">
+                    <button class="btn-secondary text-sm" onclick="removeCompetency(${competencyCount})">
+                        <i data-lucide="trash-2" class="inline-block w-4 h-4"></i>
+                    </button>
+                </div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Self-Assessment Rating</label>
+                <div class="rating-scale mb-3">
+                    <button class="rating-btn" onclick="setCompetencyRating(${competencyCount}, 1)">1</button>
+                    <button class="rating-btn" onclick="setCompetencyRating(${competencyCount}, 2)">2</button>
+                    <button class="rating-btn" onclick="setCompetencyRating(${competencyCount}, 3)">3</button>
+                    <button class="rating-btn" onclick="setCompetencyRating(${competencyCount}, 4)">4</button>
+                    <button class="rating-btn" onclick="setCompetencyRating(${competencyCount}, 5)">5</button>
+                </div>
+                <input type="hidden" id="competency-rating-${competencyCount}" value="">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Self-Assessment Comments</label>
+                <textarea class="input-style" id="competency-comments-${competencyCount}" 
+                          placeholder="Provide specific examples and evidence..."></textarea>
+                <button class="btn-secondary mt-2 text-sm" onclick="getAIAssistance('competency-comments-${competencyCount}', 'Provide self-assessment comments for this competency')">
+                    <i data-lucide="sparkles" class="inline-block w-4 h-4 mr-2"></i>
+                    Get AI Assistance
+                </button>
+                <div id="competency-comments-${competencyCount}-AI" class="ai-suggestion hidden"></div>
+            `;
+            
+            container.appendChild(div);
+            lucide.createIcons();
+            competencyCount++;
+            
+            // Update add button state
+            if (competencyCount >= 6) {
+                document.getElementById('addCompetencyBtn').disabled = true;
+                document.getElementById('addCompetencyBtn').style.opacity = '0.5';
+                document.getElementById('addCompetencyBtn').style.cursor = 'not-allowed';
+            }
+        }
+
+        function removeCompetency(index) {
+            const element = document.getElementById(`competency-${index}`);
+            if (element) {
+                element.remove();
+                competencyCount--;
+                document.getElementById('addCompetencyBtn').disabled = false;
+                document.getElementById('addCompetencyBtn').style.opacity = '1';
+                document.getElementById('addCompetencyBtn').style.cursor = 'pointer';
+            }
+        }
+
+        function setCompetencyRating(index, rating) {
+            const buttons = document.querySelectorAll(`#competency-${index} .rating-btn`);
+            buttons.forEach((btn, i) => {
+                if (i + 1 === rating) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+            document.getElementById(`competency-rating-${index}`).value = rating;
+        }
+
+        function initializeGoals() {
+            const container = document.getElementById('goalsContainer');
+            container.innerHTML = '';
+            goalCount = 0;
+            
+            // Add one default goal
+            addGoal();
+        }
+
+        function addGoal() {
+            const container = document.getElementById('goalsContainer');
+            const div = document.createElement('div');
+            div.className = 'card mb-4';
+            div.id = `goal-${goalCount}`;
+            
+            div.innerHTML = `
+                <div class="flex justify-between items-start mb-3">
+                    <h3 class="text-lg font-semibold text-gray-800">Goal ${goalCount + 1}</h3>
+                    <button class="btn-secondary text-sm" onclick="removeGoal(${goalCount})">
+                        <i data-lucide="trash-2" class="inline-block w-4 h-4"></i>
+                    </button>
+                </div>
+                <div class="mb-3">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Goal Title</label>
+                    <input type="text" class="input-style" placeholder="Enter goal title" id="goal-title-${goalCount}">
+                </div>
+                <div class="mb-3">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                    <textarea class="input-style" placeholder="Describe the goal in detail..." id="goal-description-${goalCount}"></textarea>
+                </div>
+                <div class="mb-3">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Success Criteria</label>
+                    <textarea class="input-style" placeholder="How will success be measured?" id="goal-success-${goalCount}"></textarea>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Target Date</label>
+                        <input type="date" class="input-style" id="goal-date-${goalCount}">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Priority</label>
+                        <select class="input-style" id="goal-priority-${goalCount}">
+                            <option value="high">High</option>
+                            <option value="medium">Medium</option>
+                            <option value="low">Low</option>
+                        </select>
+                    </div>
+                </div>
+                <button class="btn-secondary mt-2 text-sm" onclick="getAIAssistance('goal-description-${goalCount}', 'Help me write a SMART goal description')">
+                    <i data-lucide="sparkles" class="inline-block w-4 h-4 mr-2"></i>
+                    Get AI Assistance for Goal
+                </button>
+                <div id="goal-description-${goalCount}-AI" class="ai-suggestion hidden"></div>
+            `;
+            
+            container.appendChild(div);
+            lucide.createIcons();
+            goalCount++;
+        }
+
+        function removeGoal(index) {
+            const element = document.getElementById(`goal-${index}`);
+            if (element) {
+                element.remove();
+            }
+        }
+
+        function setManagerRating(rating) {
+            const buttons = document.querySelectorAll('#managerAssessment .rating-btn, .rating-scale:has(#managerRating) .rating-btn');
+            document.querySelectorAll('.rating-scale:has(#managerRating) .rating-btn').forEach((btn, i) => {
+                if (i + 1 === rating) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+            managerRatingValue = rating;
+            document.getElementById('managerRating').value = rating;
+        }
+
+        // AI Assistance Function
+        async function getAIAssistance(fieldId, context) {
+            const field = document.getElementById(fieldId);
+            const aiDiv = document.getElementById(`${fieldId}-AI`);
+            
+            if (!field || !aiDiv) {
+                console.error('Field or AI div not found');
+                return;
+            }
+
+            // Show loading
+            aiDiv.classList.remove('hidden');
+            aiDiv.innerHTML = '<div class="loading"></div> <span class="ml-2">Generating AI suggestions...</span>';
+
+            try {
+                // For demo purposes, we'll use a mock AI response
+                // In production, you would call Azure OpenAI, OpenAI API, or similar
+                const response = await mockAIResponse(fieldId, context, field.value);
+                
+                aiDiv.innerHTML = `
+                    <div class="mb-2">
+                        <strong>AI Suggestion:</strong>
+                        <p class="mt-2">${response}</p>
+                    </div>
+                    <button class="btn-secondary text-sm mt-2" onclick="useAISuggestion('${fieldId}', \`${response.replace(/`/g, '\\`').replace(/\$/g, '\\$')}\`)">
+                        Use This Suggestion
+                    </button>
+                    <button class="btn-secondary text-sm mt-2 ml-2" onclick="document.getElementById('${fieldId}-AI').classList.add('hidden')">
+                        Dismiss
+                    </button>
+                `;
+            } catch (error) {
+                aiDiv.innerHTML = `
+                    <div class="text-red-600">
+                        <p>Error generating AI suggestion. Please try again.</p>
+                        <button class="btn-secondary text-sm mt-2" onclick="document.getElementById('${fieldId}-AI').classList.add('hidden')">
+                            Dismiss
+                        </button>
+                    </div>
+                `;
+                console.error('AI assistance error:', error);
+            }
+        }
+
+        // Mock AI Response (Replace with actual AI API call)
+        async function mockAIResponse(fieldId, context, currentValue) {
+            // Simulate API delay
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            
+            // Mock responses based on field type
+            const mockResponses = {
+                'keyAchievements': 'Based on your input, here are some suggested achievements to highlight:\n\n• Successfully completed [project/task] ahead of schedule\n• Demonstrated strong [skill] by [specific example]\n• Contributed to team success by [specific action]\n• Received positive feedback from [stakeholder/team]\n\nRemember to be specific and quantify your achievements where possible.',
+                'challengesLearnings': 'Reflecting on challenges and learnings, consider:\n\n• Technical challenges: [specific challenge] and how you overcame it\n• Process improvements: What you learned about [specific process]\n• Skill development: New skills you acquired or improved\n• Collaboration insights: What you learned about working with others',
+                'areasForImprovement': 'Areas for improvement to consider:\n\n• Technical skills: [specific skill] that could be enhanced\n• Communication: Ways to improve [specific communication aspect]\n• Time management: Strategies for better prioritization\n• Leadership: Opportunities to develop leadership capabilities',
+                'competency': 'For this competency, consider:\n\n• Specific examples of when you demonstrated this competency\n• Quantifiable results or impact\n• Feedback received from colleagues or stakeholders\n• Continuous improvement in this area'
+            };
+
+            // Determine response type
+            let responseType = 'competency';
+            if (fieldId.includes('keyAchievements')) responseType = 'keyAchievements';
+            else if (fieldId.includes('challengesLearnings')) responseType = 'challengesLearnings';
+            else if (fieldId.includes('areasForImprovement')) responseType = 'areasForImprovement';
+            else if (fieldId.includes('goal')) {
+                return 'Here\'s a SMART goal framework:\n\n• Specific: Clearly define what you want to achieve\n• Measurable: Include metrics to track progress\n• Achievable: Ensure the goal is realistic\n• Relevant: Align with team/company objectives\n• Time-bound: Set a clear deadline\n\nExample: "By [date], I will [specific action] resulting in [measurable outcome]."';
+            }
+
+            return mockResponses[responseType] || mockResponses['competency'];
+        }
+
+        function useAISuggestion(fieldId, suggestion) {
+            const field = document.getElementById(fieldId);
+            if (field) {
+                field.value = suggestion;
+                document.getElementById(`${fieldId}-AI`).classList.add('hidden');
+            }
+        }
+
+        // Save to SharePoint
+        async function saveToSharePoint() {
+            try {
+                // Show saving status
+                showSaveStatus('Saving to SharePoint...', 'blue');
+
+                // Get all form data
+                const appraisalData = collectAppraisalData();
+
+                // Convert to JSON
+                const jsonData = JSON.stringify(appraisalData, null, 2);
+                
+                // Create filename
+                const employeeName = document.getElementById('employeeName').value || 'Employee';
+                const reviewPeriod = document.getElementById('reviewPeriod').value || 'Review';
+                const filename = `Performance_Appraisal_${employeeName.replace(/\s+/g, '_')}_${reviewPeriod.replace(/\s+/g, '_')}.json`;
+                
+                // Also save as PDF-ready format
+                const pdfData = generatePDFData(appraisalData);
+
+                // Try to save to SharePoint
+                try {
+                    await saveToSharePointAPI(jsonData, filename);
+                    showSaveStatus('Saved to SharePoint successfully!', 'green');
+                    
+                    // Also save to localStorage as backup
+                    saveToLocalStorage();
+                } catch (sharePointError) {
+                    console.error('SharePoint save error:', sharePointError);
+                    
+                    // Fallback: Save to localStorage and offer download
+                    saveToLocalStorage();
+                    downloadFile(jsonData, filename, 'application/json');
+                    showSaveStatus('Saved locally (SharePoint unavailable). File downloaded.', 'orange');
+                }
+            } catch (error) {
+                console.error('Save error:', error);
+                showSaveStatus('Error saving. Please try again.', 'red');
+            }
+        }
+
+        // Collect all appraisal data
+        function collectAppraisalData() {
+            const data = {
+                employeeInfo: {
+                    name: document.getElementById('employeeName').value,
+                    id: document.getElementById('employeeId').value,
+                    department: document.getElementById('department').value,
+                    managerName: document.getElementById('managerName').value,
+                    reviewPeriod: document.getElementById('reviewPeriod').value,
+                    reviewDate: document.getElementById('reviewDate').value
+                },
+                competencies: [],
+                selfReflection: {
+                    keyAchievements: document.getElementById('keyAchievements').value,
+                    challengesLearnings: document.getElementById('challengesLearnings').value,
+                    areasForImprovement: document.getElementById('areasForImprovement').value
+                },
+                goals: [],
+                managerAssessment: {
+                    rating: document.getElementById('managerRating').value,
+                    competencyFeedback: document.getElementById('managerCompetencyFeedback').value,
+                    strengths: document.getElementById('managerStrengths').value,
+                    developmentAreas: document.getElementById('managerDevelopmentAreas').value,
+                    recommendations: document.getElementById('managerRecommendations').value,
+                    signature: document.getElementById('managerSignature').value,
+                    signatureDate: document.getElementById('managerSignatureDate').value
+                },
+                employeeAcknowledgment: {
+                    acknowledged: document.getElementById('employeeAcknowledgment').checked,
+                    signature: document.getElementById('employeeSignature').value,
+                    signatureDate: document.getElementById('employeeSignatureDate').value
+                },
+                savedDate: new Date().toISOString()
+            };
+
+            // Collect competencies
+            for (let i = 0; i < competencyCount; i++) {
+                const competencyElement = document.getElementById(`competency-${i}`);
+                if (competencyElement) {
+                    data.competencies.push({
+                        name: document.getElementById(`competency-name-${i}`).value,
+                        rating: document.getElementById(`competency-rating-${i}`).value,
+                        comments: document.getElementById(`competency-comments-${i}`).value
+                    });
+                }
+            }
+
+            // Collect goals
+            for (let i = 0; i < goalCount; i++) {
+                const goalElement = document.getElementById(`goal-${i}`);
+                if (goalElement) {
+                    data.goals.push({
+                        title: document.getElementById(`goal-title-${i}`).value,
+                        description: document.getElementById(`goal-description-${i}`).value,
+                        successCriteria: document.getElementById(`goal-success-${i}`).value,
+                        targetDate: document.getElementById(`goal-date-${i}`).value,
+                        priority: document.getElementById(`goal-priority-${i}`).value
+                    });
+                }
+            }
+
+            return data;
+        }
+
+        // Generate PDF-ready data
+        function generatePDFData(data) {
+            // This would be used to generate a PDF version
+            // For now, we'll return formatted text
+            let pdfText = `PERFORMANCE APPRAISAL REPORT\n`;
+            pdfText += `================================\n\n`;
+            pdfText += `Employee: ${data.employeeInfo.name}\n`;
+            pdfText += `Employee ID: ${data.employeeInfo.id}\n`;
+            pdfText += `Department: ${data.employeeInfo.department}\n`;
+            pdfText += `Manager: ${data.employeeInfo.managerName}\n`;
+            pdfText += `Review Period: ${data.employeeInfo.reviewPeriod}\n`;
+            pdfText += `Review Date: ${data.employeeInfo.reviewDate}\n\n`;
+            
+            pdfText += `CORE COMPETENCIES\n`;
+            pdfText += `=================\n`;
+            data.competencies.forEach((comp, idx) => {
+                pdfText += `${idx + 1}. ${comp.name}\n`;
+                pdfText += `   Rating: ${comp.rating}/5\n`;
+                pdfText += `   Comments: ${comp.comments}\n\n`;
+            });
+            
+            pdfText += `SELF-REFLECTION\n`;
+            pdfText += `===============\n`;
+            pdfText += `Key Achievements:\n${data.selfReflection.keyAchievements}\n\n`;
+            pdfText += `Challenges and Learnings:\n${data.selfReflection.challengesLearnings}\n\n`;
+            pdfText += `Areas for Improvement:\n${data.selfReflection.areasForImprovement}\n\n`;
+            
+            pdfText += `PERFORMANCE GOALS (Next 6 Months)\n`;
+            pdfText += `==================================\n`;
+            data.goals.forEach((goal, idx) => {
+                pdfText += `${idx + 1}. ${goal.title}\n`;
+                pdfText += `   Description: ${goal.description}\n`;
+                pdfText += `   Success Criteria: ${goal.successCriteria}\n`;
+                pdfText += `   Target Date: ${goal.targetDate}\n`;
+                pdfText += `   Priority: ${goal.priority}\n\n`;
+            });
+            
+            pdfText += `MANAGER ASSESSMENT\n`;
+            pdfText += `==================\n`;
+            pdfText += `Overall Rating: ${data.managerAssessment.rating}/5\n`;
+            pdfText += `Competency Feedback:\n${data.managerAssessment.competencyFeedback}\n\n`;
+            pdfText += `Strengths:\n${data.managerAssessment.strengths}\n\n`;
+            pdfText += `Development Areas:\n${data.managerAssessment.developmentAreas}\n\n`;
+            pdfText += `Recommendations:\n${data.managerAssessment.recommendations}\n\n`;
+            pdfText += `Manager Signature: ${data.managerAssessment.signature}\n`;
+            pdfText += `Date: ${data.managerAssessment.signatureDate}\n\n`;
+            
+            pdfText += `EMPLOYEE ACKNOWLEDGMENT\n`;
+            pdfText += `=======================\n`;
+            pdfText += `Acknowledged: ${data.employeeAcknowledgment.acknowledged ? 'Yes' : 'No'}\n`;
+            pdfText += `Employee Signature: ${data.employeeAcknowledgment.signature}\n`;
+            pdfText += `Date: ${data.employeeAcknowledgment.signatureDate}\n`;
+            
+            return pdfText;
+        }
+
+        // Save to SharePoint API (requires Microsoft Graph API)
+        async function saveToSharePointAPI(jsonData, filename) {
+            // This function requires Microsoft Graph API authentication
+            // You'll need to implement proper authentication flow
+            
+            try {
+                // Check if user is authenticated
+                const accounts = msalInstance.getAllAccounts();
+                if (accounts.length === 0) {
+                    // Need to login
+                    await loginToMicrosoft();
+                    return;
+                }
+
+                // Get access token
+                const tokenRequest = {
+                    scopes: ['Files.ReadWrite.All', 'Sites.ReadWrite.All'],
+                    account: accounts[0]
+                };
+
+                const response = await msalInstance.acquireTokenSilent(tokenRequest);
+                
+                // Upload to SharePoint using Microsoft Graph API
+                const siteUrl = sharePointConfig.siteUrl;
+                const libraryName = sharePointConfig.libraryName;
+                
+                // Construct Graph API endpoint
+                const graphEndpoint = `https://graph.microsoft.com/v1.0/sites/${encodeURIComponent(siteUrl)}/drive/root:/${libraryName}/${filename}:/content`;
+                
+                const uploadResponse = await fetch(graphEndpoint, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${response.accessToken}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: jsonData
+                });
+
+                if (!uploadResponse.ok) {
+                    throw new Error(`SharePoint upload failed: ${uploadResponse.statusText}`);
+                }
+
+                return await uploadResponse.json();
+            } catch (error) {
+                console.error('SharePoint API error:', error);
+                throw error;
+            }
+        }
+
+        // Login to Microsoft
+        async function loginToMicrosoft() {
+            try {
+                const loginRequest = {
+                    scopes: ['Files.ReadWrite.All', 'Sites.ReadWrite.All']
+                };
+                await msalInstance.loginPopup(loginRequest);
+            } catch (error) {
+                console.error('Login error:', error);
+                throw error;
+            }
+        }
+
+        // Load from SharePoint
+        async function loadFromSharePoint() {
+            try {
+                showSaveStatus('Loading from SharePoint...', 'blue');
+                
+                // Implement SharePoint file picker or list
+                // For now, we'll use a file input as fallback
+                const input = document.createElement('input');
+                input.type = 'file';
+                input.accept = '.json';
+                input.onchange = async (e) => {
+                    const file = e.target.files[0];
+                    if (file) {
+                        const text = await file.text();
+                        const data = JSON.parse(text);
+                        populateAppraisalData(data);
+                        showSaveStatus('Loaded successfully!', 'green');
+                    }
+                };
+                input.click();
+            } catch (error) {
+                console.error('Load error:', error);
+                showSaveStatus('Error loading file.', 'red');
+            }
+        }
+
+        // Populate form with data
+        function populateAppraisalData(data) {
+            // Employee info
+            if (data.employeeInfo) {
+                document.getElementById('employeeName').value = data.employeeInfo.name || '';
+                document.getElementById('employeeId').value = data.employeeInfo.id || '';
+                document.getElementById('department').value = data.employeeInfo.department || '';
+                document.getElementById('managerName').value = data.employeeInfo.managerName || '';
+                document.getElementById('reviewPeriod').value = data.employeeInfo.reviewPeriod || '';
+                document.getElementById('reviewDate').value = data.employeeInfo.reviewDate || '';
+            }
+
+            // Competencies
+            if (data.competencies && data.competencies.length > 0) {
+                initializeCompetencies();
+                data.competencies.forEach((comp, idx) => {
+                    if (idx < 6) {
+                        if (idx >= competencyCount) {
+                            addCompetency(comp.name);
+                        } else {
+                            document.getElementById(`competency-name-${idx}`).value = comp.name || '';
+                            setCompetencyRating(idx, parseInt(comp.rating) || 0);
+                            document.getElementById(`competency-comments-${idx}`).value = comp.comments || '';
+                        }
+                    }
+                });
+            }
+
+            // Self-reflection
+            if (data.selfReflection) {
+                document.getElementById('keyAchievements').value = data.selfReflection.keyAchievements || '';
+                document.getElementById('challengesLearnings').value = data.selfReflection.challengesLearnings || '';
+                document.getElementById('areasForImprovement').value = data.selfReflection.areasForImprovement || '';
+            }
+
+            // Goals
+            if (data.goals && data.goals.length > 0) {
+                initializeGoals();
+                data.goals.forEach((goal, idx) => {
+                    if (idx > 0) addGoal();
+                    document.getElementById(`goal-title-${idx}`).value = goal.title || '';
+                    document.getElementById(`goal-description-${idx}`).value = goal.description || '';
+                    document.getElementById(`goal-success-${idx}`).value = goal.successCriteria || '';
+                    document.getElementById(`goal-date-${idx}`).value = goal.targetDate || '';
+                    document.getElementById(`goal-priority-${idx}`).value = goal.priority || 'medium';
+                });
+            }
+
+            // Manager assessment
+            if (data.managerAssessment) {
+                if (data.managerAssessment.rating) {
+                    setManagerRating(parseInt(data.managerAssessment.rating));
+                }
+                document.getElementById('managerCompetencyFeedback').value = data.managerAssessment.competencyFeedback || '';
+                document.getElementById('managerStrengths').value = data.managerAssessment.strengths || '';
+                document.getElementById('managerDevelopmentAreas').value = data.managerAssessment.developmentAreas || '';
+                document.getElementById('managerRecommendations').value = data.managerAssessment.recommendations || '';
+                document.getElementById('managerSignature').value = data.managerAssessment.signature || '';
+                document.getElementById('managerSignatureDate').value = data.managerAssessment.signatureDate || '';
+            }
+
+            // Employee acknowledgment
+            if (data.employeeAcknowledgment) {
+                document.getElementById('employeeAcknowledgment').checked = data.employeeAcknowledgment.acknowledged || false;
+                document.getElementById('employeeSignature').value = data.employeeAcknowledgment.signature || '';
+                document.getElementById('employeeSignatureDate').value = data.employeeAcknowledgment.signatureDate || '';
+            }
+        }
+
+        // Local storage functions
+        function saveToLocalStorage() {
+            const data = collectAppraisalData();
+            localStorage.setItem('performanceAppraisal', JSON.stringify(data));
+        }
+
+        function loadFromLocalStorage() {
+            const saved = localStorage.getItem('performanceAppraisal');
+            if (saved) {
+                try {
+                    const data = JSON.parse(saved);
+                    populateAppraisalData(data);
+                } catch (error) {
+                    console.error('Error loading from localStorage:', error);
+                }
+            }
+        }
+
+        // Auto-save to localStorage
+        document.addEventListener('input', function(e) {
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') {
+                saveToLocalStorage();
+            }
+        });
+
+        document.addEventListener('change', function(e) {
+            if (e.target.type === 'checkbox') {
+                saveToLocalStorage();
+            }
+        });
+
+        // Download file
+        function downloadFile(content, filename, contentType) {
+            const blob = new Blob([content], { type: contentType });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        // Show save status
+        function showSaveStatus(message, color) {
+            const statusDiv = document.getElementById('saveStatus');
+            const statusText = document.getElementById('saveStatusText');
+            
+            statusDiv.className = `fixed bottom-4 right-4 px-6 py-3 rounded-lg shadow-lg text-white`;
+            
+            if (color === 'green') {
+                statusDiv.style.backgroundColor = '#10b981';
+            } else if (color === 'blue') {
+                statusDiv.style.backgroundColor = '#3b82f6';
+            } else if (color === 'orange') {
+                statusDiv.style.backgroundColor = '#f59e0b';
+            } else if (color === 'red') {
+                statusDiv.style.backgroundColor = '#ef4444';
+            }
+            
+            statusText.textContent = message;
+            statusDiv.classList.remove('hidden');
+            
+            setTimeout(() => {
+                statusDiv.classList.add('hidden');
+            }, 5000);
+        }
+    </script>
+</body>
+</html>
+

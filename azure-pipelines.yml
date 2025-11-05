@@ -1,0 +1,68 @@
+# Azure DevOps Pipeline for Performance Appraisal System
+# This pipeline deploys the Performance Appraisal System to Azure Static Web Apps
+
+trigger:
+  branches:
+    include:
+    - main
+    - master
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  - group: 'PerformanceAppraisalVariables'  # Create this variable group in Azure DevOps
+  # Variables needed:
+  # - azureStaticWebAppName
+  # - azureSubscription
+  # - resourceGroupName
+
+steps:
+  # Checkout code
+  - checkout: self
+
+  # Build step (if needed for processing files)
+  - task: NodeTool@0
+    inputs:
+      versionSpec: '18.x'
+    displayName: 'Install Node.js'
+
+  # Copy files to staging directory
+  - task: CopyFiles@2
+    inputs:
+      SourceFolder: '$(System.DefaultWorkingDirectory)'
+      Contents: |
+        index.html
+        **/*.html
+        **/*.css
+        **/*.js
+      TargetFolder: '$(Build.ArtifactStagingDirectory)/app'
+      OverWrite: true
+    displayName: 'Copy files to staging'
+
+  # Optionally minify HTML/CSS/JS
+  - task: Npm@1
+    inputs:
+      command: 'custom'
+      customCommand: 'install -g html-minifier-terser'
+    displayName: 'Install minification tools'
+    condition: false  # Disable if not needed
+
+  # Deploy to Azure Static Web Apps
+  - task: AzureStaticWebApp@0
+    inputs:
+      app_location: '$(Build.ArtifactStagingDirectory)/app'
+      api_location: ''  # Leave empty if no API
+      output_location: ''
+      azure_static_web_apps_api_token: '$(AZURE_STATIC_WEB_APPS_API_TOKEN)'
+    displayName: 'Deploy to Azure Static Web Apps'
+
+  # Alternative: Deploy to Azure App Service
+  - task: AzureWebApp@1
+    inputs:
+      azureSubscription: '$(azureSubscription)'
+      appName: '$(azureStaticWebAppName)'
+      package: '$(Build.ArtifactStagingDirectory)/app'
+    displayName: 'Deploy to Azure App Service'
+    condition: false  # Enable if using App Service instead of Static Web Apps
+
