@@ -164,10 +164,55 @@
         .hidden {
             display: none;
         }
+        
+        .logo-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .logo-seeo {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #1e40af;
+            font-family: 'Inter', sans-serif;
+            text-transform: lowercase;
+            position: relative;
+            display: inline-block;
+        }
+        
+        .logo-tm {
+            font-size: 0.8rem;
+            color: #f97316;
+            position: absolute;
+            top: -0.15rem;
+            right: -1rem;
+            font-weight: 400;
+            line-height: 1;
+        }
+        
+        .logo-know {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #f97316;
+            font-family: 'Inter', sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-top: -0.25rem;
+        }
     </style>
 </head>
 <body>
     <div class="container mx-auto px-4 py-8 max-w-6xl">
+        <!-- Logo -->
+        <div class="logo-container mb-4">
+            <div class="logo-seeo">
+                seeo<span class="logo-tm">™</span>
+            </div>
+            <div class="logo-know">KNOW</div>
+        </div>
+        
         <!-- Header -->
         <div class="card mb-6">
             <div class="flex justify-between items-center">
@@ -176,14 +221,37 @@
                     <p class="text-gray-600 mt-2">seedigital.ai Staff Performance Review</p>
                 </div>
                 <div class="flex gap-3">
-                    <button id="saveBtn" class="btn-primary" onclick="saveToSharePoint()">
+                    <button id="saveDraftBtn" class="btn-secondary" onclick="saveDraft()">
                         <i data-lucide="save" class="inline-block w-4 h-4 mr-2"></i>
+                        Save Draft
+                    </button>
+                    <button id="shareBtn" class="btn-blue" onclick="shareAppraisal()">
+                        <i data-lucide="share-2" class="inline-block w-4 h-4 mr-2"></i>
+                        Share Link
+                    </button>
+                    <button id="emailBtn" class="btn-blue" onclick="sendEmailNotification()">
+                        <i data-lucide="mail" class="inline-block w-4 h-4 mr-2"></i>
+                        Email Link
+                    </button>
+                    <button id="saveBtn" class="btn-primary" onclick="saveToSharePoint()">
+                        <i data-lucide="cloud-upload" class="inline-block w-4 h-4 mr-2"></i>
                         Save to SharePoint
                     </button>
-                    <button id="loadBtn" class="btn-secondary" onclick="loadFromSharePoint()">
-                        <i data-lucide="folder-open" class="inline-block w-4 h-4 mr-2"></i>
-                        Load
+                    <button id="exportAuditBtn" class="btn-secondary" onclick="exportForSOC2Audit()" style="background-color: #8b5cf6; color: white;">
+                        <i data-lucide="file-text" class="inline-block w-4 h-4 mr-2"></i>
+                        Export for SOC 2 Audit
                     </button>
+                </div>
+            </div>
+            <div class="mt-4 pt-4 border-t border-gray-200">
+                <div class="flex items-center gap-4">
+                    <div>
+                        <span class="text-sm text-gray-600">Appraisal ID:</span>
+                        <span id="appraisalId" class="text-sm font-mono font-semibold text-blue-600 ml-2"></span>
+                    </div>
+                    <div class="text-sm text-gray-500">
+                        <span id="lastSaved" class="italic"></span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -228,7 +296,7 @@
                 <!-- Competencies will be dynamically added here -->
             </div>
             
-            <button class="btn-secondary mt-4" onclick="addCompetency()" id="addCompetencyBtn">
+            <button class="btn-secondary mt-4" id="addCompetencyBtn" type="button" onclick="console.log('Button clicked!'); try { if(window.addCompetency) { window.addCompetency(); } else if(window._addCompetency) { window._addCompetency(); } else { alert('Function not found. Please refresh.'); } } catch(e) { console.error('Error:', e); alert('Error: ' + e.message); } return false;">
                 <i data-lucide="plus" class="inline-block w-4 h-4 mr-2"></i>
                 Add Competency
             </button>
@@ -246,7 +314,7 @@
                     <i data-lucide="sparkles" class="inline-block w-4 h-4 mr-2"></i>
                     Get AI Assistance
                 </button>
-                <div id="keyAchievementsAI" class="ai-suggestion hidden"></div>
+                <div id="keyAchievements-AI" class="ai-suggestion hidden"></div>
             </div>
             
             <div class="mb-4">
@@ -256,7 +324,7 @@
                     <i data-lucide="sparkles" class="inline-block w-4 h-4 mr-2"></i>
                     Get AI Assistance
                 </button>
-                <div id="challengesLearningsAI" class="ai-suggestion hidden"></div>
+                <div id="challengesLearnings-AI" class="ai-suggestion hidden"></div>
             </div>
             
             <div class="mb-4">
@@ -266,7 +334,7 @@
                     <i data-lucide="sparkles" class="inline-block w-4 h-4 mr-2"></i>
                     Get AI Assistance
                 </button>
-                <div id="areasForImprovementAI" class="ai-suggestion hidden"></div>
+                <div id="areasForImprovement-AI" class="ai-suggestion hidden"></div>
             </div>
         </div>
 
@@ -279,20 +347,20 @@
                 <!-- Goals will be dynamically added here -->
             </div>
             
-            <button class="btn-secondary mt-4" onclick="addGoal()">
+            <button class="btn-secondary mt-4" id="addGoalBtn" type="button" onclick="console.log('Button clicked!'); try { if(window.addGoal) { window.addGoal(); } else if(window._addGoal) { window._addGoal(); } else { alert('Function not found. Please refresh.'); } } catch(e) { console.error('Error:', e); alert('Error: ' + e.message); } return false;">
                 <i data-lucide="plus" class="inline-block w-4 h-4 mr-2"></i>
                 Add Goal
             </button>
         </div>
 
         <!-- Manager Assessment -->
-        <div class="card">
+        <div class="card" id="managerAssessment">
             <h2 class="section-header">Manager Assessment</h2>
             <p class="text-gray-600 mb-4">Manager's evaluation and feedback (to be completed by manager).</p>
             
             <div class="mb-4">
                 <label class="block text-sm font-medium text-gray-700 mb-2">Overall Performance Rating</label>
-                <div class="rating-scale">
+                <div class="rating-scale" id="managerRatingScale">
                     <button class="rating-btn" onclick="setManagerRating(1)">1 - Needs Improvement</button>
                     <button class="rating-btn" onclick="setManagerRating(2)">2 - Below Expectations</button>
                     <button class="rating-btn" onclick="setManagerRating(3)">3 - Meets Expectations</button>
@@ -305,21 +373,41 @@
             <div class="mb-4">
                 <label class="block text-sm font-medium text-gray-700 mb-2">Manager's Feedback on Core Competencies</label>
                 <textarea id="managerCompetencyFeedback" class="input-style" placeholder="Provide feedback on each core competency..."></textarea>
+                <button class="btn-secondary mt-2 text-sm" onclick="getAIAssistance('managerCompetencyFeedback', 'Help me write feedback on employee competencies')">
+                    <i data-lucide="sparkles" class="inline-block w-4 h-4 mr-2"></i>
+                    Get AI Assistance
+                </button>
+                <div id="managerCompetencyFeedback-AI" class="ai-suggestion hidden"></div>
             </div>
             
             <div class="mb-4">
                 <label class="block text-sm font-medium text-gray-700 mb-2">Strengths</label>
                 <textarea id="managerStrengths" class="input-style" placeholder="Identify employee strengths..."></textarea>
+                <button class="btn-secondary mt-2 text-sm" onclick="getAIAssistance('managerStrengths', 'Help me identify employee strengths')">
+                    <i data-lucide="sparkles" class="inline-block w-4 h-4 mr-2"></i>
+                    Get AI Assistance
+                </button>
+                <div id="managerStrengths-AI" class="ai-suggestion hidden"></div>
             </div>
             
             <div class="mb-4">
                 <label class="block text-sm font-medium text-gray-700 mb-2">Development Areas</label>
                 <textarea id="managerDevelopmentAreas" class="input-style" placeholder="Identify areas for development..."></textarea>
+                <button class="btn-secondary mt-2 text-sm" onclick="getAIAssistance('managerDevelopmentAreas', 'Help me identify areas for employee development')">
+                    <i data-lucide="sparkles" class="inline-block w-4 h-4 mr-2"></i>
+                    Get AI Assistance
+                </button>
+                <div id="managerDevelopmentAreas-AI" class="ai-suggestion hidden"></div>
             </div>
             
             <div class="mb-4">
                 <label class="block text-sm font-medium text-gray-700 mb-2">Recommendations for Next 6 Months</label>
                 <textarea id="managerRecommendations" class="input-style" placeholder="Provide recommendations for the next review period..."></textarea>
+                <button class="btn-secondary mt-2 text-sm" onclick="getAIAssistance('managerRecommendations', 'Help me write recommendations for the next 6 months')">
+                    <i data-lucide="sparkles" class="inline-block w-4 h-4 mr-2"></i>
+                    Get AI Assistance
+                </button>
+                <div id="managerRecommendations-AI" class="ai-suggestion hidden"></div>
             </div>
             
             <div class="mb-4">
@@ -346,6 +434,51 @@
             </div>
         </div>
 
+        <!-- Comprehensive AI Assessment Section -->
+        <div class="card bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-blue-200">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="section-header text-blue-800">
+                    <i data-lucide="sparkles" class="inline-block w-6 h-6 mr-2 text-blue-600"></i>
+                    AI Performance Assessment
+                </h2>
+            </div>
+            <p class="text-gray-700 mb-4">
+                Get comprehensive AI feedback on your entire performance appraisal. The AI will review both employee and manager sections, 
+                provide suggestions for improvement, and help you enhance your responses. You can rerun the assessment multiple times to 
+                refine your appraisal.
+            </p>
+            
+            <div class="mb-4">
+                <button id="runAIAssessmentBtn" class="btn-blue w-full md:w-auto" onclick="runComprehensiveAIAssessment()">
+                    <i data-lucide="sparkles" class="inline-block w-5 h-5 mr-2"></i>
+                    Run AI Assessment
+                </button>
+                <button id="rerunAIAssessmentBtn" class="btn-secondary w-full md:w-auto ml-2 hidden" onclick="runComprehensiveAIAssessment()">
+                    <i data-lucide="refresh-cw" class="inline-block w-5 h-5 mr-2"></i>
+                    Rerun Assessment
+                </button>
+            </div>
+            
+            <div id="aiAssessmentLoading" class="hidden mb-4 p-4 bg-white rounded-lg border border-blue-200">
+                <div class="flex items-center">
+                    <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mr-3"></div>
+                    <span class="text-gray-700">AI is analyzing your performance appraisal...</span>
+                </div>
+            </div>
+            
+            <div id="aiAssessmentResults" class="hidden bg-white rounded-lg border border-blue-200 p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold text-gray-800">Assessment Results</h3>
+                    <button onclick="document.getElementById('aiAssessmentResults').classList.add('hidden')" class="text-gray-500 hover:text-gray-700">
+                        <i data-lucide="x" class="w-5 h-5"></i>
+                    </button>
+                </div>
+                <div id="aiAssessmentContent" class="space-y-6 text-gray-700">
+                    <!-- Assessment content will be populated here -->
+                </div>
+            </div>
+        </div>
+
         <!-- Save Status -->
         <div id="saveStatus" class="hidden fixed bottom-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg">
             <span id="saveStatusText">Saved successfully!</span>
@@ -369,12 +502,31 @@
             }
         };
 
-        const msalInstance = new msal.PublicClientApplication(msalConfig);
+        // Initialize MSAL only if it's available (lazy initialization)
+        let msalInstance = null;
+        if (typeof msal !== 'undefined' && msal.PublicClientApplication) {
+            msalInstance = new msal.PublicClientApplication(msalConfig);
+        } else {
+            console.warn('MSAL library not loaded. SharePoint integration will not work until MSAL is loaded.');
+        }
 
         // SharePoint Configuration
+        // Update these values with your SharePoint site details
         const sharePointConfig = {
-            siteUrl: 'YOUR_SHAREPOINT_SITE_URL', // e.g., 'https://yourtenant.sharepoint.com/sites/PerformanceAppraisals'
-            libraryName: 'Performance Appraisals' // SharePoint library name
+            // Your SharePoint site URL (full URL including /sites/...)
+            // Example: 'https://yourtenant.sharepoint.com/sites/PerformanceAppraisals'
+            // Or: 'https://yourtenant.sharepoint.com/sites/YourSiteName'
+            siteUrl: 'YOUR_SHAREPOINT_SITE_URL',
+            
+            // The document library name where appraisals will be saved
+            // This is the name of the document library in SharePoint
+            // Example: 'Performance Appraisals' or 'Documents' or 'Shared Documents'
+            libraryName: 'Performance Appraisals',
+            
+            // Optional: Subfolder within the document library
+            // Leave as empty string '' if you want to save directly in the library root
+            // Example: 'Appraisals' or '2024' or 'Appraisals/2024'
+            folderPath: '' // e.g., 'Appraisals' or 'Appraisals/2024'
         };
 
         // Default competencies (up to 6)
@@ -387,46 +539,82 @@
             'Innovation & Creativity'
         ];
 
-        let competencyCount = 0;
-        let goalCount = 0;
-        let managerRatingValue = 0;
+        // Initialize variables FIRST - before any functions that use them
+        // Use var instead of let to avoid temporal dead zone issues
+        var competencyCount = 0;
+        var goalCount = 0;
+        var managerRatingValue = 0;
+        var currentAppraisalId = null;
+        
+        // Make sure variables are initialized immediately
+        console.log('Variables initialized:', { competencyCount, goalCount });
 
-        // Initialize app
-        document.addEventListener('DOMContentLoaded', function() {
-            initializeCompetencies();
-            initializeGoals();
-            setReviewDate();
-            
-            // Check for saved data in localStorage
-            loadFromLocalStorage();
-        });
-
-        function setReviewDate() {
-            const today = new Date();
-            const dateStr = today.toISOString().split('T')[0];
-            document.getElementById('reviewDate').value = dateStr;
+        // Generate unique appraisal ID
+        function generateAppraisalId() {
+            // Format: APP-YYYYMMDD-HHMMSS-XXXX (last 4 random chars)
+            const now = new Date();
+            const dateStr = now.toISOString().slice(0, 10).replace(/-/g, '');
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            const timeStr = hours + minutes + seconds;
+            const random = Math.random().toString(36).substring(2, 6).toUpperCase();
+            return `APP-${dateStr}-${timeStr}-${random}`;
         }
 
-        function initializeCompetencies() {
-            const container = document.getElementById('competenciesContainer');
-            container.innerHTML = '';
-            competencyCount = 0;
+        // Get appraisal ID from URL or generate new one
+        function getAppraisalId() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const idFromUrl = urlParams.get('id');
             
-            // Add default competencies
-            defaultCompetencies.forEach(competency => {
-                if (competencyCount < 6) {
-                    addCompetency(competency);
-                }
-            });
+            if (idFromUrl) {
+                return idFromUrl;
+            }
+            
+            // Generate new ID if none exists
+            const newId = generateAppraisalId();
+            // Update URL without reload
+            const newUrl = new URL(window.location);
+            newUrl.searchParams.set('id', newId);
+            window.history.replaceState({}, '', newUrl);
+            return newId;
         }
 
+        // Define addCompetency function BEFORE DOMContentLoaded
         function addCompetency(name = '') {
+            // Ensure competencyCount is a valid number
+            if (typeof competencyCount !== 'number' || isNaN(competencyCount)) {
+                console.warn('competencyCount was not a number, resetting to 0');
+                competencyCount = 0;
+            }
+            
+            console.log('=== addCompetency function called! ===', 'name:', name, 'Current count:', competencyCount, 'Type:', typeof competencyCount);
+            
             if (competencyCount >= 6) {
                 alert('Maximum of 6 core competencies allowed.');
                 return;
             }
 
-            const container = document.getElementById('competenciesContainer');
+            // Wait for container to be available if DOM isn't ready yet
+            let container = document.getElementById('competenciesContainer');
+            if (!container) {
+                console.log('Container not found yet, waiting for DOM...');
+                // Wait a bit for DOM to be ready
+                if (document.readyState === 'loading') {
+                    alert('Please wait for the page to finish loading, then try again.');
+                    return;
+                }
+                // Try one more time
+                container = document.getElementById('competenciesContainer');
+                if (!container) {
+                    console.error('Competencies container not found!');
+                    alert('Error: Competencies container not found. Please refresh the page.');
+                    return;
+                }
+            }
+            
+            console.log('Container found, creating competency element...');
+            
             const div = document.createElement('div');
             div.className = 'competency-item';
             div.id = `competency-${competencyCount}`;
@@ -440,12 +628,12 @@
                     </button>
                 </div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">Self-Assessment Rating</label>
-                <div class="rating-scale mb-3">
-                    <button class="rating-btn" onclick="setCompetencyRating(${competencyCount}, 1)">1</button>
-                    <button class="rating-btn" onclick="setCompetencyRating(${competencyCount}, 2)">2</button>
-                    <button class="rating-btn" onclick="setCompetencyRating(${competencyCount}, 3)">3</button>
-                    <button class="rating-btn" onclick="setCompetencyRating(${competencyCount}, 4)">4</button>
-                    <button class="rating-btn" onclick="setCompetencyRating(${competencyCount}, 5)">5</button>
+                <div class="rating-scale mb-3" id="competency-rating-scale-${competencyCount}">
+                    <button type="button" class="rating-btn" data-rating="1" data-competency-index="${competencyCount}" onclick="if(typeof setCompetencyRating === 'function') { setCompetencyRating(${competencyCount}, 1); } else { console.error('setCompetencyRating not available'); }">1</button>
+                    <button type="button" class="rating-btn" data-rating="2" data-competency-index="${competencyCount}" onclick="if(typeof setCompetencyRating === 'function') { setCompetencyRating(${competencyCount}, 2); } else { console.error('setCompetencyRating not available'); }">2</button>
+                    <button type="button" class="rating-btn" data-rating="3" data-competency-index="${competencyCount}" onclick="if(typeof setCompetencyRating === 'function') { setCompetencyRating(${competencyCount}, 3); } else { console.error('setCompetencyRating not available'); }">3</button>
+                    <button type="button" class="rating-btn" data-rating="4" data-competency-index="${competencyCount}" onclick="if(typeof setCompetencyRating === 'function') { setCompetencyRating(${competencyCount}, 4); } else { console.error('setCompetencyRating not available'); }">4</button>
+                    <button type="button" class="rating-btn" data-rating="5" data-competency-index="${competencyCount}" onclick="if(typeof setCompetencyRating === 'function') { setCompetencyRating(${competencyCount}, 5); } else { console.error('setCompetencyRating not available'); }">5</button>
                 </div>
                 <input type="hidden" id="competency-rating-${competencyCount}" value="">
                 <label class="block text-sm font-medium text-gray-700 mb-2">Self-Assessment Comments</label>
@@ -459,58 +647,93 @@
             `;
             
             container.appendChild(div);
+            
+            // Store the current index before incrementing
+            const currentIndex = competencyCount;
+            console.log('Competency element added to container. Index:', currentIndex, 'Display number:', currentIndex + 1);
             lucide.createIcons();
+            
+            // Increment AFTER creating the element
             competencyCount++;
+            console.log('competencyCount incremented to:', competencyCount);
             
-            // Update add button state
-            if (competencyCount >= 6) {
-                document.getElementById('addCompetencyBtn').disabled = true;
-                document.getElementById('addCompetencyBtn').style.opacity = '0.5';
-                document.getElementById('addCompetencyBtn').style.cursor = 'not-allowed';
+            // Verify the onclick handlers have the correct index (only log, don't modify)
+            if (console && console.log) {
+                const ratingButtons = div.querySelectorAll('.rating-btn');
+                ratingButtons.forEach((btn, i) => {
+                    const btnIndex = parseInt(btn.getAttribute('data-competency-index'));
+                    if (btnIndex !== currentIndex) {
+                        console.warn(`Rating button ${i + 1} index mismatch:`, btnIndex, 'Expected:', currentIndex);
+                    }
+                });
             }
-        }
-
-        function removeCompetency(index) {
-            const element = document.getElementById(`competency-${index}`);
-            if (element) {
-                element.remove();
-                competencyCount--;
-                document.getElementById('addCompetencyBtn').disabled = false;
-                document.getElementById('addCompetencyBtn').style.opacity = '1';
-                document.getElementById('addCompetencyBtn').style.cursor = 'pointer';
-            }
-        }
-
-        function setCompetencyRating(index, rating) {
-            const buttons = document.querySelectorAll(`#competency-${index} .rating-btn`);
-            buttons.forEach((btn, i) => {
-                if (i + 1 === rating) {
-                    btn.classList.add('active');
+            
+            // Update add button state based on current count
+            const btn = document.getElementById('addCompetencyBtn');
+            if (btn) {
+                if (competencyCount >= 6) {
+                    btn.disabled = true;
+                    btn.style.opacity = '0.5';
+                    btn.style.cursor = 'not-allowed';
+                    console.log('Add Competency button disabled (max reached)');
                 } else {
-                    btn.classList.remove('active');
+                    btn.disabled = false;
+                    btn.style.opacity = '1';
+                    btn.style.cursor = 'pointer';
+                    console.log('Add Competency button enabled');
                 }
-            });
-            document.getElementById(`competency-rating-${index}`).value = rating;
-        }
-
-        function initializeGoals() {
-            const container = document.getElementById('goalsContainer');
-            container.innerHTML = '';
-            goalCount = 0;
+            }
             
-            // Add one default goal
-            addGoal();
+            console.log('Competency added successfully. Total count:', competencyCount);
         }
 
+        // Define addGoal function BEFORE DOMContentLoaded
         function addGoal() {
-            const container = document.getElementById('goalsContainer');
+            // Wait for container to be available if DOM isn't ready yet
+            let container = document.getElementById('goalsContainer');
+            if (!container) {
+                console.log('Container not found yet, waiting for DOM...');
+                // Wait a bit for DOM to be ready
+                if (document.readyState === 'loading') {
+                    alert('Please wait for the page to finish loading, then try again.');
+                    return;
+                }
+                // Try one more time
+                container = document.getElementById('goalsContainer');
+                if (!container) {
+                    console.error('Goals container not found!');
+                    alert('Error: Goals container not found. Please refresh the page.');
+                    return;
+                }
+            }
+            
+            // ALWAYS count existing goals to get the correct index for the new goal
+            // Use a more specific selector - only match div elements with id="goal-X" (not goal-title-X, etc.)
+            const existingGoals = container.querySelectorAll('div[id^="goal-"]');
+            // Filter to only get the main goal containers (not nested elements)
+            const actualGoalElements = Array.from(existingGoals).filter(el => {
+                const id = el.id;
+                // Match only IDs like "goal-0", "goal-1", etc. (not "goal-title-0")
+                return /^goal-\d+$/.test(id);
+            });
+            const actualGoalCount = actualGoalElements.length;
+            
+            // Set goalCount to match actual count (this ensures it's always correct)
+            goalCount = actualGoalCount;
+            
+            console.log('=== addGoal called === Existing goal containers:', actualGoalCount, 'New goal will be index:', goalCount);
+            
             const div = document.createElement('div');
             div.className = 'card mb-4';
             div.id = `goal-${goalCount}`;
             
+            // Calculate display number (goalCount is 0-based, display is 1-based)
+            const goalDisplayNumber = goalCount + 1;
+            console.log('Adding goal with index:', goalCount, 'Display number:', goalDisplayNumber);
+            
             div.innerHTML = `
                 <div class="flex justify-between items-start mb-3">
-                    <h3 class="text-lg font-semibold text-gray-800">Goal ${goalCount + 1}</h3>
+                    <h3 class="text-lg font-semibold text-gray-800">Goal ${goalDisplayNumber}</h3>
                     <button class="btn-secondary text-sm" onclick="removeGoal(${goalCount})">
                         <i data-lucide="trash-2" class="inline-block w-4 h-4"></i>
                     </button>
@@ -549,43 +772,565 @@
             `;
             
             container.appendChild(div);
+            console.log('Goal element added to container. Display number:', goalDisplayNumber);
             lucide.createIcons();
-            goalCount++;
+            // goalCount is already correct (we set it based on actual count before adding)
+            // No need to increment - next goal will count again and get the correct number
+            console.log('Goal added successfully. Current goalCount:', goalCount);
+        }
+
+        // NOW create wrapper functions AFTER addCompetency and addGoal are defined
+        // This ensures all variables and functions are initialized
+        // Store reference to original function to avoid recursion
+        const originalAddCompetency = addCompetency;
+        window.addCompetency = function(name = '') {
+            console.log('=== window.addCompetency CALLED ===', name);
+            try {
+                // Call the original function directly to avoid recursion
+                originalAddCompetency(name);
+            } catch(e) {
+                console.error('Error in addCompetency:', e);
+                alert('Error adding competency: ' + e.message);
+            }
+        };
+        
+        // Store reference to original function to avoid recursion
+        const originalAddGoal = addGoal;
+        window.addGoal = function() {
+            console.log('=== window.addGoal CALLED ===');
+            try {
+                // Call the original function directly to avoid recursion
+                originalAddGoal();
+            } catch(e) {
+                console.error('Error in addGoal:', e);
+                alert('Error adding goal: ' + e.message);
+            }
+        };
+        
+        // Debug: Log function availability immediately
+        console.log('Functions defined. Check:', {
+            addCompetency: typeof addCompetency,
+            addGoal: typeof addGoal,
+            window_addCompetency: typeof window.addCompetency,
+            window_addGoal: typeof window.addGoal,
+            competencyCount: competencyCount,
+            goalCount: goalCount
+        });
+
+        // Comprehensive AI Assessment Function - Define BEFORE DOMContentLoaded
+        async function runComprehensiveAIAssessment() {
+            console.log('Running comprehensive AI assessment...');
+            
+            // Show loading state
+            const loadingDiv = document.getElementById('aiAssessmentLoading');
+            const resultsDiv = document.getElementById('aiAssessmentResults');
+            const contentDiv = document.getElementById('aiAssessmentContent');
+            const rerunBtn = document.getElementById('rerunAIAssessmentBtn');
+            
+            if (loadingDiv) loadingDiv.classList.remove('hidden');
+            if (resultsDiv) resultsDiv.classList.add('hidden');
+            
+            try {
+                // Collect all appraisal data
+                const appraisalData = collectAppraisalData();
+                
+                // Simulate API delay (replace with actual AI API call)
+                await new Promise(resolve => setTimeout(resolve, 2000));
+                
+                // Generate comprehensive assessment
+                const assessment = generateComprehensiveAssessment(appraisalData);
+                
+                // Display results
+                if (contentDiv) {
+                    contentDiv.innerHTML = assessment;
+                }
+                
+                if (resultsDiv) {
+                    resultsDiv.classList.remove('hidden');
+                }
+                
+                if (rerunBtn) {
+                    rerunBtn.classList.remove('hidden');
+                }
+                
+                // Scroll to results
+                resultsDiv?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                
+            } catch (error) {
+                console.error('AI Assessment error:', error);
+                if (contentDiv) {
+                    contentDiv.innerHTML = '<div class="text-red-600 p-4">Error generating assessment. Please try again.</div>';
+                }
+                if (resultsDiv) {
+                    resultsDiv.classList.remove('hidden');
+                }
+            } finally {
+                if (loadingDiv) loadingDiv.classList.add('hidden');
+                lucide.createIcons();
+            }
+        }
+        
+        // Make function globally accessible
+        window.runComprehensiveAIAssessment = runComprehensiveAIAssessment;
+        
+        // Create wrapper functions AFTER all functions are defined
+        // These wrappers will be called from onclick handlers
+        // We need to wait until after addCompetency and addGoal are defined
+        // So we'll define these wrappers at the end, after all functions are defined
+
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize Lucide icons first
+            lucide.createIcons();
+            
+            // Get or create appraisal ID - ALWAYS ensure ID exists
+            currentAppraisalId = getAppraisalId();
+            document.getElementById('appraisalId').textContent = currentAppraisalId;
+            
+            // Log the appraisal ID for debugging
+            console.log('Appraisal ID:', currentAppraisalId);
+            
+            // Make functions globally accessible immediately (already done above for addCompetency, addGoal, runComprehensiveAIAssessment, getAIAssistance)
+            window.removeCompetency = removeCompetency;
+            window.removeGoal = removeGoal;
+            window.setCompetencyRating = setCompetencyRating;
+            window.setManagerRating = setManagerRating;
+            
+            // Set up event delegation for competency rating buttons as a backup
+            // Primary method is inline onclick handlers in the HTML
+            const competenciesContainer = document.getElementById('competenciesContainer');
+            if (competenciesContainer) {
+                console.log('Setting up event delegation for competency rating buttons (backup)');
+                competenciesContainer.addEventListener('click', handleCompetencyRatingClick);
+            } else {
+                console.error('Competencies container not found when setting up event delegation');
+            }
+            
+            initializeCompetencies();
+            initializeGoals();
+            setReviewDate();
+            
+            // Load saved data if ID exists in URL or localStorage
+            const loaded = loadAppraisalById(currentAppraisalId);
+            if (!loaded) {
+                // If no saved data, ensure ID is in URL
+                const urlParams = new URLSearchParams(window.location.search);
+                if (!urlParams.get('id')) {
+                    const newUrl = new URL(window.location);
+                    newUrl.searchParams.set('id', currentAppraisalId);
+                    window.history.replaceState({}, '', newUrl);
+                }
+            }
+            
+            // Update last saved time
+            updateLastSavedTime();
+            
+            // Verify buttons exist and functions are accessible
+            console.log('Function check:', {
+                addCompetency: typeof window.addCompetency,
+                addGoal: typeof window.addGoal,
+                addCompetencyDirect: typeof addCompetency,
+                addGoalDirect: typeof addGoal
+            });
+            
+            // Attach event listeners directly to buttons - SIMPLE AND DIRECT
+            const addCompetencyBtn = document.getElementById('addCompetencyBtn');
+            if (addCompetencyBtn) {
+                console.log('Add Competency button found, attaching listener');
+                addCompetencyBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('=== Add Competency button clicked! ===');
+                    window.addCompetency();
+                });
+            } else {
+                console.error('Add Competency button not found!');
+            }
+            
+            const addGoalBtn = document.getElementById('addGoalBtn');
+            if (addGoalBtn) {
+                console.log('Add Goal button found, attaching listener');
+                addGoalBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('=== Add Goal button clicked! ===');
+                    window.addGoal();
+                });
+            } else {
+                console.error('Add Goal button not found!');
+            }
+            
+            // Reinitialize icons after content is loaded
+            setTimeout(() => {
+                lucide.createIcons();
+                saveToLocalStorage();
+            }, 100);
+        });
+
+        function setReviewDate() {
+            const today = new Date();
+            const dateStr = today.toISOString().split('T')[0];
+            document.getElementById('reviewDate').value = dateStr;
+        }
+
+        // Event delegation handler for competency rating buttons
+        function handleCompetencyRatingClick(e) {
+            // Find the rating button (could be clicked directly or child element was clicked)
+            const ratingBtn = e.target.closest('.rating-btn');
+            if (ratingBtn) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                // Find the rating scale container (parent of the button)
+                const ratingScale = ratingBtn.closest('.rating-scale');
+                if (ratingScale) {
+                    // Extract the competency index from the rating scale ID
+                    const ratingScaleId = ratingScale.id;
+                    console.log('Clicked rating scale ID:', ratingScaleId);
+                    const match = ratingScaleId.match(/competency-rating-scale-(\d+)/);
+                    if (match) {
+                        const competencyIndex = parseInt(match[1]);
+                        const rating = parseInt(ratingBtn.getAttribute('data-rating'));
+                        console.log('Event delegation: Rating button clicked for competency', competencyIndex, 'rating:', rating);
+                        if (!isNaN(competencyIndex) && !isNaN(rating)) {
+                            setCompetencyRating(competencyIndex, rating);
+                        } else {
+                            console.error('Invalid competency index or rating:', { competencyIndex, rating, ratingScaleId });
+                        }
+                    } else {
+                        console.error('Could not extract competency index from rating scale ID:', ratingScaleId);
+                        // Fallback: try to find parent competency element
+                        const competencyEl = ratingBtn.closest('.competency-item');
+                        if (competencyEl) {
+                            const competencyId = competencyEl.id;
+                            const idMatch = competencyId.match(/competency-(\d+)/);
+                            if (idMatch) {
+                                const competencyIndex = parseInt(idMatch[1]);
+                                const rating = parseInt(ratingBtn.getAttribute('data-rating'));
+                                console.log('Fallback: Using competency element ID, competency', competencyIndex, 'rating:', rating);
+                                if (!isNaN(competencyIndex) && !isNaN(rating)) {
+                                    setCompetencyRating(competencyIndex, rating);
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    console.error('Could not find rating scale container for clicked button');
+                }
+            }
+        }
+
+        function initializeCompetencies() {
+            const container = document.getElementById('competenciesContainer');
+            if (!container) {
+                console.error('Competencies container not found');
+                return;
+            }
+            container.innerHTML = '';
+            competencyCount = 0;
+            
+            // Add default competencies - use original function directly to avoid recursion
+            const originalAddCompetency = addCompetency;
+            defaultCompetencies.forEach(competency => {
+                if (competencyCount < 6) {
+                    originalAddCompetency(competency);
+                }
+            });
+        }
+
+        function removeCompetency(index) {
+            console.log('=== removeCompetency called === index:', index, 'current competencyCount:', competencyCount);
+            const element = document.getElementById(`competency-${index}`);
+            if (element) {
+                element.remove();
+                console.log('Competency element removed');
+                
+                // Renumber all remaining competencies sequentially (like we do for goals)
+                const container = document.getElementById('competenciesContainer');
+                if (container) {
+                    // Get all remaining competencies - only match main competency containers
+                    const allCompetencies = Array.from(container.querySelectorAll('div[id^="competency-"]'));
+                    const remainingCompetencies = allCompetencies.filter(el => {
+                        const id = el.id;
+                        // Match only IDs like "competency-0", "competency-1", etc.
+                        return /^competency-\d+$/.test(id);
+                    });
+                    console.log('Remaining competencies after deletion:', remainingCompetencies.length, 'current competencyCount was:', competencyCount);
+                    
+                    // IMPORTANT: Set competencyCount to the number of remaining competencies IMMEDIATELY
+                    const newCompetencyCount = remainingCompetencies.length;
+                    competencyCount = newCompetencyCount;
+                    console.log('=== Set competencyCount to:', competencyCount, 'based on remaining competencies count ===');
+                    
+                    // Renumber remaining competencies sequentially
+                    remainingCompetencies.forEach((compEl, newIndex) => {
+                        const oldId = compEl.id;
+                        const newId = `competency-${newIndex}`;
+                        const displayNumber = newIndex + 1;
+                        
+                        console.log(`Renumbering competency: ${oldId} -> ${newId}`);
+                        
+                        compEl.id = newId;
+                        
+                        // Update all input IDs within this competency
+                        const inputs = compEl.querySelectorAll('input, textarea, select, div[id*="competency-"]');
+                        inputs.forEach(input => {
+                            if (input.id) {
+                                const oldInputId = input.id;
+                                input.id = input.id.replace(/competency-\d+/, `competency-${newIndex}`);
+                                console.log(`Updated input ID: ${oldInputId} -> ${input.id}`);
+                            }
+                        });
+                        
+                        // Update AI divs
+                        const aiDivs = compEl.querySelectorAll('[id$="-AI"]');
+                        aiDivs.forEach(div => {
+                            if (div.id) {
+                                div.id = div.id.replace(/competency-\d+/, `competency-${newIndex}`);
+                            }
+                        });
+                        
+                        // Update onclick handlers in buttons
+                        const buttons = compEl.querySelectorAll('button[onclick]');
+                        buttons.forEach(button => {
+                            if (button.onclick || button.getAttribute('onclick')) {
+                                const onclickAttr = button.getAttribute('onclick') || '';
+                                const updatedOnclick = onclickAttr.replace(/competency-\d+/g, `competency-${newIndex}`);
+                                button.setAttribute('onclick', updatedOnclick);
+                            }
+                        });
+                    });
+                    
+                    console.log('Competency removed. Renumbered competencies. Final competencyCount:', competencyCount);
+                }
+                
+                // Update button state - always re-enable after deletion
+                const btn = document.getElementById('addCompetencyBtn');
+                if (btn) {
+                    btn.disabled = false;
+                    btn.style.opacity = '1';
+                    btn.style.cursor = 'pointer';
+                    console.log('Add Competency button re-enabled');
+                }
+            } else {
+                console.error('Competency element not found for index:', index);
+            }
+        }
+
+        function setCompetencyRating(index, rating) {
+            console.log('=== setCompetencyRating called ===', { index, rating });
+            
+            // Validate inputs
+            if (typeof index !== 'number' || isNaN(index) || index < 0) {
+                console.error('Invalid competency index:', index);
+                return;
+            }
+            if (typeof rating !== 'number' || isNaN(rating) || rating < 1 || rating > 5) {
+                console.error('Invalid rating:', rating);
+                return;
+            }
+            
+            // Find the specific competency container
+            const competencyEl = document.getElementById(`competency-${index}`);
+            if (!competencyEl) {
+                console.error('Competency element not found:', `competency-${index}`);
+                return;
+            }
+            
+            // Find the rating scale container for this specific competency
+            const ratingScale = document.getElementById(`competency-rating-scale-${index}`);
+            if (!ratingScale) {
+                console.error('Rating scale not found:', `competency-rating-scale-${index}`);
+                // Fallback: try to find it within the competency element
+                const fallbackScale = competencyEl.querySelector('.rating-scale');
+                if (fallbackScale) {
+                    console.log('Found fallback rating scale');
+                    const buttons = fallbackScale.querySelectorAll('.rating-btn');
+                    buttons.forEach((btn, i) => {
+                        const btnRating = parseInt(btn.getAttribute('data-rating')) || (i + 1);
+                        if (btnRating === rating) {
+                            btn.classList.add('active');
+                        } else {
+                            btn.classList.remove('active');
+                        }
+                    });
+                } else {
+                    console.error('Could not find rating scale for competency', index);
+                    return;
+                }
+            } else {
+                // Get rating buttons ONLY within this specific rating scale
+                const buttons = ratingScale.querySelectorAll('.rating-btn');
+                console.log('Found buttons:', buttons.length, 'for competency', index, 'in rating scale', `competency-rating-scale-${index}`);
+                
+                buttons.forEach((btn) => {
+                    const btnRating = parseInt(btn.getAttribute('data-rating'));
+                    if (!isNaN(btnRating) && btnRating === rating) {
+                        btn.classList.add('active');
+                        console.log('Activated button', btnRating, 'for competency', index);
+                    } else {
+                        btn.classList.remove('active');
+                    }
+                });
+            }
+            
+            const hiddenInput = document.getElementById(`competency-rating-${index}`);
+            if (hiddenInput) {
+                hiddenInput.value = rating;
+                console.log('Set rating value to', rating, 'for competency', index);
+            } else {
+                console.error('Rating input not found:', `competency-rating-${index}`);
+            }
+        }
+
+        function initializeGoals() {
+            const container = document.getElementById('goalsContainer');
+            if (!container) {
+                console.error('Goals container not found');
+                return;
+            }
+            container.innerHTML = '';
+            // Ensure goalCount is a valid number
+            goalCount = 0;
+            
+            // Add one default goal - use original function directly to avoid recursion
+            // We need to call the original addGoal, not window.addGoal
+            // Since this is defined before window.addGoal is assigned, we can call it directly
+            const originalAddGoal = addGoal;
+            originalAddGoal();
         }
 
         function removeGoal(index) {
+            console.log('=== removeGoal called === index:', index, 'current goalCount:', goalCount);
             const element = document.getElementById(`goal-${index}`);
             if (element) {
                 element.remove();
+                console.log('Goal element removed');
+                
+                // Renumber all remaining goals sequentially
+                const container = document.getElementById('goalsContainer');
+                if (container) {
+                    // Get all remaining goals - only match main goal containers, not nested elements
+                    const allGoals = Array.from(container.querySelectorAll('div[id^="goal-"]'));
+                    const remainingGoals = allGoals.filter(el => {
+                        const id = el.id;
+                        // Match only IDs like "goal-0", "goal-1", etc. (not "goal-title-0")
+                        return /^goal-\d+$/.test(id);
+                    });
+                    console.log('Remaining goals after deletion:', remainingGoals.length, 'current goalCount was:', goalCount);
+                    
+                    // IMPORTANT: Set goalCount to the number of remaining goals IMMEDIATELY
+                    // This ensures the next goal added will be numbered correctly
+                    const newGoalCount = remainingGoals.length;
+                    goalCount = newGoalCount;
+                    console.log('=== Set goalCount to:', goalCount, 'based on remaining goals count ===');
+                    console.log('Next goal added will have ID: goal-', goalCount, 'and display: Goal', goalCount + 1);
+                    
+                    // Renumber all goals sequentially starting from 0
+                    remainingGoals.forEach((goalEl, newIndex) => {
+                        const oldId = goalEl.id;
+                        const newId = `goal-${newIndex}`;
+                        const displayNumber = newIndex + 1;
+                        
+                        console.log(`Renumbering goal: ${oldId} -> ${newId}, display: Goal ${displayNumber}`);
+                        
+                        // Update the goal element ID
+                        goalEl.id = newId;
+                        
+                        // Update all input/textarea IDs within this goal
+                        const inputs = goalEl.querySelectorAll('input, textarea, select');
+                        inputs.forEach(input => {
+                            if (input.id) {
+                                const oldInputId = input.id;
+                                input.id = input.id.replace(/goal-\d+/, `goal-${newIndex}`);
+                                console.log(`Updated input ID: ${oldInputId} -> ${input.id}`);
+                            }
+                        });
+                        
+                        // Update AI assistance div IDs
+                        const aiDivs = goalEl.querySelectorAll('[id$="-AI"]');
+                        aiDivs.forEach(div => {
+                            if (div.id) {
+                                div.id = div.id.replace(/goal-\d+/, `goal-${newIndex}`);
+                            }
+                        });
+                        
+                        // Update onclick handlers
+                        const buttons = goalEl.querySelectorAll('button[onclick]');
+                        buttons.forEach(button => {
+                            if (button.onclick || button.getAttribute('onclick')) {
+                                const onclickAttr = button.getAttribute('onclick') || '';
+                                const updatedOnclick = onclickAttr.replace(/goal-\d+/g, `goal-${newIndex}`);
+                                button.setAttribute('onclick', updatedOnclick);
+                            }
+                        });
+                        
+                        // Update display number
+                        const titleEl = goalEl.querySelector('h3');
+                        if (titleEl) {
+                            titleEl.textContent = `Goal ${displayNumber}`;
+                        }
+                        
+                        // Update removeGoal onclick handler
+                        const removeBtn = goalEl.querySelector('button[onclick*="removeGoal"]');
+                        if (removeBtn) {
+                            removeBtn.setAttribute('onclick', `removeGoal(${newIndex})`);
+                        }
+                    });
+                    
+                    console.log('Goal removed. Renumbered goals. Final goalCount:', goalCount);
+                }
+            } else {
+                console.error('Goal element not found for index:', index);
             }
         }
 
         function setManagerRating(rating) {
-            const buttons = document.querySelectorAll('#managerAssessment .rating-btn, .rating-scale:has(#managerRating) .rating-btn');
-            document.querySelectorAll('.rating-scale:has(#managerRating) .rating-btn').forEach((btn, i) => {
+            console.log('Setting manager rating:', rating);
+            const ratingScale = document.getElementById('managerRatingScale');
+            if (!ratingScale) {
+                console.error('Manager rating scale not found');
+                return;
+            }
+            
+            const buttons = ratingScale.querySelectorAll('.rating-btn');
+            buttons.forEach((btn, i) => {
                 if (i + 1 === rating) {
                     btn.classList.add('active');
                 } else {
                     btn.classList.remove('active');
                 }
             });
+            
             managerRatingValue = rating;
-            document.getElementById('managerRating').value = rating;
+            const hiddenInput = document.getElementById('managerRating');
+            if (hiddenInput) {
+                hiddenInput.value = rating;
+            }
+            
+            console.log('Manager rating set to:', rating);
         }
 
-        // AI Assistance Function
+        // AI Assistance Function for individual fields
         async function getAIAssistance(fieldId, context) {
+            console.log('AI Assistance requested for:', fieldId, context);
             const field = document.getElementById(fieldId);
             const aiDiv = document.getElementById(`${fieldId}-AI`);
             
-            if (!field || !aiDiv) {
-                console.error('Field or AI div not found');
+            if (!field) {
+                console.error('Field not found:', fieldId);
+                return;
+            }
+            
+            if (!aiDiv) {
+                console.error('AI div not found:', `${fieldId}-AI`);
                 return;
             }
 
             // Show loading
             aiDiv.classList.remove('hidden');
             aiDiv.innerHTML = '<div class="loading"></div> <span class="ml-2">Generating AI suggestions...</span>';
+            lucide.createIcons();
 
             try {
                 // For demo purposes, we'll use a mock AI response
@@ -627,7 +1372,11 @@
                 'keyAchievements': 'Based on your input, here are some suggested achievements to highlight:\n\n• Successfully completed [project/task] ahead of schedule\n• Demonstrated strong [skill] by [specific example]\n• Contributed to team success by [specific action]\n• Received positive feedback from [stakeholder/team]\n\nRemember to be specific and quantify your achievements where possible.',
                 'challengesLearnings': 'Reflecting on challenges and learnings, consider:\n\n• Technical challenges: [specific challenge] and how you overcame it\n• Process improvements: What you learned about [specific process]\n• Skill development: New skills you acquired or improved\n• Collaboration insights: What you learned about working with others',
                 'areasForImprovement': 'Areas for improvement to consider:\n\n• Technical skills: [specific skill] that could be enhanced\n• Communication: Ways to improve [specific communication aspect]\n• Time management: Strategies for better prioritization\n• Leadership: Opportunities to develop leadership capabilities',
-                'competency': 'For this competency, consider:\n\n• Specific examples of when you demonstrated this competency\n• Quantifiable results or impact\n• Feedback received from colleagues or stakeholders\n• Continuous improvement in this area'
+                'competency': 'For this competency, consider:\n\n• Specific examples of when you demonstrated this competency\n• Quantifiable results or impact\n• Feedback received from colleagues or stakeholders\n• Continuous improvement in this area',
+                'managerCompetencyFeedback': 'For competency feedback, consider:\n\n• Compare your assessment with the employee\'s self-assessment\n• Provide specific examples of observed behaviors\n• Acknowledge strengths and address gaps\n• Be constructive and supportive\n• Include actionable steps for improvement',
+                'managerStrengths': 'For identifying strengths, consider:\n\n• Technical skills: [specific skill] demonstrated through [example]\n• Soft skills: [specific skill] shown in [situation]\n• Business impact: How strengths contributed to [outcome]\n• Be specific with examples and connect to business value',
+                'managerDevelopmentAreas': 'For development areas, consider:\n\n• Identify 2-3 key areas for growth\n• Be constructive and frame as opportunities\n• Provide specific examples of where improvement is needed\n• Suggest actionable steps for development\n• Ensure recommendations are achievable',
+                'managerRecommendations': 'For recommendations, consider:\n\n• Align with employee\'s goals where appropriate\n• Suggest specific development activities (training, projects, mentorship)\n• Set clear expectations for improvement\n• Make recommendations actionable and measurable\n• Include timeline or checkpoints'
             };
 
             // Determine response type
@@ -635,6 +1384,11 @@
             if (fieldId.includes('keyAchievements')) responseType = 'keyAchievements';
             else if (fieldId.includes('challengesLearnings')) responseType = 'challengesLearnings';
             else if (fieldId.includes('areasForImprovement')) responseType = 'areasForImprovement';
+            else if (fieldId.includes('competency-comments')) responseType = 'competency';
+            else if (fieldId.includes('managerCompetencyFeedback')) responseType = 'managerCompetencyFeedback';
+            else if (fieldId.includes('managerStrengths')) responseType = 'managerStrengths';
+            else if (fieldId.includes('managerDevelopmentAreas')) responseType = 'managerDevelopmentAreas';
+            else if (fieldId.includes('managerRecommendations')) responseType = 'managerRecommendations';
             else if (fieldId.includes('goal')) {
                 return 'Here\'s a SMART goal framework:\n\n• Specific: Clearly define what you want to achieve\n• Measurable: Include metrics to track progress\n• Achievable: Ensure the goal is realistic\n• Relevant: Align with team/company objectives\n• Time-bound: Set a clear deadline\n\nExample: "By [date], I will [specific action] resulting in [measurable outcome]."';
             }
@@ -649,23 +1403,236 @@
                 document.getElementById(`${fieldId}-AI`).classList.add('hidden');
             }
         }
+        
+        // Make AI assistance functions globally accessible
+        window.getAIAssistance = getAIAssistance;
+        window.useAISuggestion = useAISuggestion;
 
-        // Save to SharePoint
+        // Generate comprehensive assessment based on appraisal data
+        function generateComprehensiveAssessment(data) {
+            let assessment = '';
+            
+            // Employee Section Assessment
+            assessment += '<div class="border-b border-gray-200 pb-4 mb-4">';
+            assessment += '<h4 class="text-lg font-semibold text-blue-800 mb-3 flex items-center gap-2">';
+            assessment += '<i data-lucide="user" class="w-5 h-5"></i>';
+            assessment += 'Employee Section Assessment';
+            assessment += '</h4>';
+            
+            // Check competencies
+            if (!data.selfAssessment || !data.selfAssessment.competencies || data.selfAssessment.competencies.length === 0) {
+                assessment += '<div class="bg-yellow-50 border-l-4 border-yellow-400 p-3 mb-3">';
+                assessment += '<p class="text-yellow-800"><strong>⚠️ Missing:</strong> No competencies have been added. Consider adding at least 3-4 core competencies with ratings and detailed comments.</p>';
+                assessment += '</div>';
+            } else {
+                assessment += '<div class="bg-green-50 border-l-4 border-green-400 p-3 mb-3">';
+                assessment += `<p class="text-green-800"><strong>✓ Completed:</strong> ${data.selfAssessment.competencies.length} competency/competencies added.</p>`;
+                assessment += '</div>';
+                
+                // Review each competency
+                data.selfAssessment.competencies.forEach((comp, idx) => {
+                    assessment += '<div class="ml-4 mb-2 p-2 bg-gray-50 rounded">';
+                    assessment += `<p class="font-medium">Competency ${idx + 1}: ${comp.name || 'Unnamed'}</p>`;
+                    if (!comp.rating || comp.rating === '') {
+                        assessment += '<p class="text-yellow-700 text-sm">⚠️ Rating not provided</p>';
+                    }
+                    if (!comp.comments || comp.comments.trim() === '') {
+                        assessment += '<p class="text-yellow-700 text-sm">⚠️ Comments missing - add specific examples and evidence</p>';
+                    } else if (comp.comments.length < 50) {
+                        assessment += '<p class="text-yellow-700 text-sm">💡 Suggestion: Expand comments with more specific examples and quantifiable results</p>';
+                    } else {
+                        assessment += '<p class="text-green-700 text-sm">✓ Comments are detailed</p>';
+                    }
+                    assessment += '</div>';
+                });
+            }
+            
+            // Check self-reflection
+            const hasReflection = data.selfReflection && (
+                (data.selfReflection.keyAchievements && data.selfReflection.keyAchievements.trim() !== '') ||
+                (data.selfReflection.challengesLearnings && data.selfReflection.challengesLearnings.trim() !== '') ||
+                (data.selfReflection.areasForImprovement && data.selfReflection.areasForImprovement.trim() !== '')
+            );
+            
+            if (!hasReflection) {
+                assessment += '<div class="bg-yellow-50 border-l-4 border-yellow-400 p-3 mb-3">';
+                assessment += '<p class="text-yellow-800"><strong>⚠️ Missing:</strong> Self-reflection section is incomplete. Add key achievements, challenges/learnings, and areas for improvement.</p>';
+                assessment += '</div>';
+            } else {
+                assessment += '<div class="bg-green-50 border-l-4 border-green-400 p-3 mb-3">';
+                assessment += '<p class="text-green-800"><strong>✓ Completed:</strong> Self-reflection section has content.</p>';
+                assessment += '</div>';
+                
+                if (data.selfReflection.keyAchievements && data.selfReflection.keyAchievements.trim() !== '') {
+                    if (data.selfReflection.keyAchievements.length < 100) {
+                        assessment += '<p class="ml-4 text-yellow-700 text-sm mb-2">💡 Key Achievements: Consider adding more specific examples with metrics and impact</p>';
+                    }
+                }
+            }
+            
+            // Check goals
+            if (!data.goals || data.goals.length === 0) {
+                assessment += '<div class="bg-yellow-50 border-l-4 border-yellow-400 p-3 mb-3">';
+                assessment += '<p class="text-yellow-800"><strong>⚠️ Missing:</strong> No goals have been set for the next 6 months. Add at least 2-3 SMART goals.</p>';
+                assessment += '</div>';
+            } else {
+                assessment += '<div class="bg-green-50 border-l-4 border-green-400 p-3 mb-3">';
+                assessment += `<p class="text-green-800"><strong>✓ Completed:</strong> ${data.goals.length} goal/goals added.</p>`;
+                assessment += '</div>';
+                
+                data.goals.forEach((goal, idx) => {
+                    assessment += '<div class="ml-4 mb-2 p-2 bg-gray-50 rounded">';
+                    assessment += `<p class="font-medium">Goal ${idx + 1}: ${goal.title || 'Untitled'}</p>`;
+                    if (!goal.description || goal.description.trim() === '') {
+                        assessment += '<p class="text-yellow-700 text-sm">⚠️ Description missing - make it SMART (Specific, Measurable, Achievable, Relevant, Time-bound)</p>';
+                    }
+                    if (!goal.successCriteria || goal.successCriteria.trim() === '') {
+                        assessment += '<p class="text-yellow-700 text-sm">⚠️ Success criteria missing - define how you\'ll measure completion</p>';
+                    }
+                    if (!goal.targetDate) {
+                        assessment += '<p class="text-yellow-700 text-sm">⚠️ Target date not set</p>';
+                    }
+                    assessment += '</div>';
+                });
+            }
+            
+            assessment += '</div>';
+            
+            // Manager Section Assessment
+            assessment += '<div class="border-b border-gray-200 pb-4 mb-4">';
+            assessment += '<h4 class="text-lg font-semibold text-blue-800 mb-3 flex items-center gap-2">';
+            assessment += '<i data-lucide="user-check" class="w-5 h-5"></i>';
+            assessment += 'Manager Section Assessment';
+            assessment += '</h4>';
+            
+            if (!data.managerAssessment) {
+                assessment += '<div class="bg-gray-50 border-l-4 border-gray-400 p-3 mb-3">';
+                assessment += '<p class="text-gray-800"><strong>ℹ️ Pending:</strong> Manager assessment has not been completed yet.</p>';
+                assessment += '</div>';
+            } else {
+                if (!data.managerAssessment.rating || data.managerAssessment.rating === '') {
+                    assessment += '<div class="bg-yellow-50 border-l-4 border-yellow-400 p-3 mb-3">';
+                    assessment += '<p class="text-yellow-800"><strong>⚠️ Missing:</strong> Overall performance rating not provided.</p>';
+                    assessment += '</div>';
+                } else {
+                    assessment += '<div class="bg-green-50 border-l-4 border-green-400 p-3 mb-3">';
+                    assessment += `<p class="text-green-800"><strong>✓ Completed:</strong> Overall rating: ${data.managerAssessment.rating}/5</p>`;
+                    assessment += '</div>';
+                }
+                
+                if (!data.managerAssessment.competencyFeedback || data.managerAssessment.competencyFeedback.trim() === '') {
+                    assessment += '<p class="ml-4 text-yellow-700 text-sm mb-2">⚠️ Competency feedback missing - provide specific feedback on each competency</p>';
+                }
+                
+                if (!data.managerAssessment.strengths || data.managerAssessment.strengths.trim() === '') {
+                    assessment += '<p class="ml-4 text-yellow-700 text-sm mb-2">⚠️ Strengths section empty - identify 3-5 key strengths with examples</p>';
+                } else if (data.managerAssessment.strengths.length < 100) {
+                    assessment += '<p class="ml-4 text-yellow-700 text-sm mb-2">💡 Strengths: Consider adding more specific examples and connecting to business impact</p>';
+                }
+                
+                if (!data.managerAssessment.developmentAreas || data.managerAssessment.developmentAreas.trim() === '') {
+                    assessment += '<p class="ml-4 text-yellow-700 text-sm mb-2">⚠️ Development areas missing - identify 2-3 areas for growth with actionable steps</p>';
+                }
+                
+                if (!data.managerAssessment.recommendations || data.managerAssessment.recommendations.trim() === '') {
+                    assessment += '<p class="ml-4 text-yellow-700 text-sm mb-2">⚠️ Recommendations missing - provide specific development activities for next 6 months</p>';
+                }
+            }
+            
+            assessment += '</div>';
+            
+            // Overall Recommendations
+            assessment += '<div class="bg-blue-50 border-l-4 border-blue-400 p-4">';
+            assessment += '<h4 class="text-lg font-semibold text-blue-800 mb-3 flex items-center gap-2">';
+            assessment += '<i data-lucide="lightbulb" class="w-5 h-5"></i>';
+            assessment += 'Overall Recommendations';
+            assessment += '</h4>';
+            assessment += '<ul class="list-disc list-inside space-y-2 text-gray-700">';
+            assessment += '<li>Be specific with examples and use quantifiable metrics where possible</li>';
+            assessment += '<li>Ensure all sections are complete before finalizing</li>';
+            assessment += '<li>Align employee goals with manager recommendations</li>';
+            assessment += '<li>Use action verbs and clear language throughout</li>';
+            assessment += '<li>Review your responses and make improvements based on this feedback</li>';
+            assessment += '<li><strong>Tip:</strong> You can rerun this assessment after making improvements to see updated feedback</li>';
+            assessment += '</ul>';
+            assessment += '</div>';
+            
+            return assessment;
+        }
+
+        // Save Draft (saves to browser and optionally downloads)
+        function saveDraft() {
+            try {
+                // Ensure Appraisal ID exists before saving
+                if (!currentAppraisalId) {
+                    currentAppraisalId = getAppraisalId();
+                    document.getElementById('appraisalId').textContent = currentAppraisalId;
+                }
+                
+                // Save to localStorage (auto-save already does this, but this is explicit)
+                saveToLocalStorage();
+                
+                // Get all form data
+                const appraisalData = collectAppraisalData();
+                appraisalData.appraisalId = currentAppraisalId;
+                appraisalData.status = 'draft'; // Mark as draft
+                appraisalData.lastSaved = new Date().toISOString();
+                
+                // Convert to JSON
+                const jsonData = JSON.stringify(appraisalData, null, 2);
+                
+                // Create filename with Draft indicator
+                const employeeName = document.getElementById('employeeName').value || 'Employee';
+                const reviewPeriod = document.getElementById('reviewPeriod').value || 'Review';
+                const filename = `Performance_Appraisal_DRAFT_${currentAppraisalId}_${employeeName.replace(/\s+/g, '_')}_${reviewPeriod.replace(/\s+/g, '_')}.json`;
+                
+                // Download as backup
+                downloadFile(jsonData, filename, 'application/json');
+                
+                showSaveStatus('Draft saved successfully! (Downloaded as backup)', 'green');
+                
+                // Update last saved time
+                updateLastSavedTime();
+            } catch (error) {
+                console.error('Draft save error:', error);
+                showSaveStatus('Error saving draft. Please try again.', 'red');
+            }
+        }
+
+        // Save to SharePoint (works for both drafts and completed forms)
         async function saveToSharePoint() {
             try {
+                // Ensure Appraisal ID exists before saving
+                if (!currentAppraisalId) {
+                    currentAppraisalId = getAppraisalId();
+                    document.getElementById('appraisalId').textContent = currentAppraisalId;
+                }
+                
                 // Show saving status
                 showSaveStatus('Saving to SharePoint...', 'blue');
 
-                // Get all form data
+                // Get all form data (includes appraisalId) - works for incomplete forms too
                 const appraisalData = collectAppraisalData();
+                
+                // Ensure appraisal ID is in the data
+                appraisalData.appraisalId = currentAppraisalId;
+                
+                // Check if form is complete or draft
+                const isComplete = checkFormCompletion(appraisalData);
+                if (!isComplete) {
+                    appraisalData.status = 'draft';
+                } else {
+                    appraisalData.status = 'completed';
+                }
 
                 // Convert to JSON
                 const jsonData = JSON.stringify(appraisalData, null, 2);
                 
-                // Create filename
+                // Create filename with Appraisal ID for easy identification
                 const employeeName = document.getElementById('employeeName').value || 'Employee';
                 const reviewPeriod = document.getElementById('reviewPeriod').value || 'Review';
-                const filename = `Performance_Appraisal_${employeeName.replace(/\s+/g, '_')}_${reviewPeriod.replace(/\s+/g, '_')}.json`;
+                const statusPrefix = isComplete ? '' : 'DRAFT_';
+                const filename = `Performance_Appraisal_${statusPrefix}${currentAppraisalId}_${employeeName.replace(/\s+/g, '_')}_${reviewPeriod.replace(/\s+/g, '_')}.json`;
                 
                 // Also save as PDF-ready format
                 const pdfData = generatePDFData(appraisalData);
@@ -673,7 +1640,8 @@
                 // Try to save to SharePoint
                 try {
                     await saveToSharePointAPI(jsonData, filename);
-                    showSaveStatus('Saved to SharePoint successfully!', 'green');
+                    const statusMsg = isComplete ? 'Saved to SharePoint successfully!' : 'Draft saved to SharePoint successfully!';
+                    showSaveStatus(statusMsg, 'green');
                     
                     // Also save to localStorage as backup
                     saveToLocalStorage();
@@ -683,17 +1651,39 @@
                     // Fallback: Save to localStorage and offer download
                     saveToLocalStorage();
                     downloadFile(jsonData, filename, 'application/json');
-                    showSaveStatus('Saved locally (SharePoint unavailable). File downloaded.', 'orange');
+                    const fallbackMsg = isComplete 
+                        ? 'Saved locally (SharePoint unavailable). File downloaded.' 
+                        : 'Draft saved locally (SharePoint unavailable). File downloaded.';
+                    showSaveStatus(fallbackMsg, 'orange');
                 }
             } catch (error) {
                 console.error('Save error:', error);
                 showSaveStatus('Error saving. Please try again.', 'red');
             }
         }
+        
+        // Check if form is complete (optional - for status tracking)
+        function checkFormCompletion(data) {
+            // Check if employee sections are filled
+            const employeeComplete = data.employeeInfo.name && 
+                                   data.selfReflection.keyAchievements &&
+                                   data.competencies.length > 0;
+            
+            // Check if manager sections are filled
+            const managerComplete = data.managerAssessment.signature &&
+                                   data.managerAssessment.rating;
+            
+            // Check if employee acknowledged
+            const acknowledged = data.employeeAcknowledgment.acknowledged;
+            
+            // Form is complete if employee and manager sections are done and acknowledged
+            return employeeComplete && managerComplete && acknowledged;
+        }
 
         // Collect all appraisal data
         function collectAppraisalData() {
             const data = {
+                appraisalId: currentAppraisalId || getAppraisalId(),
                 employeeInfo: {
                     name: document.getElementById('employeeName').value,
                     id: document.getElementById('employeeId').value,
@@ -761,12 +1751,14 @@
             // For now, we'll return formatted text
             let pdfText = `PERFORMANCE APPRAISAL REPORT\n`;
             pdfText += `================================\n\n`;
+            pdfText += `Appraisal ID: ${data.appraisalId || currentAppraisalId || 'Not Assigned'}\n`;
             pdfText += `Employee: ${data.employeeInfo.name}\n`;
             pdfText += `Employee ID: ${data.employeeInfo.id}\n`;
             pdfText += `Department: ${data.employeeInfo.department}\n`;
             pdfText += `Manager: ${data.employeeInfo.managerName}\n`;
             pdfText += `Review Period: ${data.employeeInfo.reviewPeriod}\n`;
-            pdfText += `Review Date: ${data.employeeInfo.reviewDate}\n\n`;
+            pdfText += `Review Date: ${data.employeeInfo.reviewDate}\n`;
+            pdfText += `Saved Date: ${data.savedDate || new Date().toISOString()}\n\n`;
             
             pdfText += `CORE COMPETENCIES\n`;
             pdfText += `=================\n`;
@@ -811,6 +1803,455 @@
             return pdfText;
         }
 
+        // Export for SOC 2 Audit - Generate comprehensive document
+        function exportForSOC2Audit() {
+            console.log('Exporting appraisal for SOC 2 audit...');
+            
+            const data = collectAppraisalData();
+            const exportDate = new Date().toISOString();
+            const exportDateFormatted = new Date(exportDate).toLocaleString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                timeZoneName: 'short'
+            });
+
+            // Create a comprehensive HTML document for audit
+            const auditDocument = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Performance Appraisal - SOC 2 Audit Document</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            line-height: 1.6;
+            color: #1f2937;
+            background: white;
+            padding: 40px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .audit-header {
+            border-bottom: 3px solid #3b82f6;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .audit-header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1e40af;
+            margin-bottom: 10px;
+        }
+        
+        .audit-header .subtitle {
+            font-size: 14px;
+            color: #6b7280;
+            font-weight: 500;
+        }
+        
+        .audit-meta {
+            background: #f3f4f6;
+            border-left: 4px solid #8b5cf6;
+            padding: 20px;
+            margin-bottom: 30px;
+            border-radius: 4px;
+        }
+        
+        .audit-meta h2 {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 15px;
+        }
+        
+        .meta-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            font-size: 14px;
+        }
+        
+        .meta-item {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .meta-label {
+            font-weight: 600;
+            color: #4b5563;
+            margin-bottom: 4px;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .meta-value {
+            color: #1f2937;
+            font-weight: 500;
+        }
+        
+        .section {
+            margin-bottom: 40px;
+            page-break-inside: avoid;
+        }
+        
+        .section-header {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1e40af;
+            border-bottom: 2px solid #e5e7eb;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .competency-item {
+            background: #f9fafb;
+            border-left: 4px solid #3b82f6;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+        }
+        
+        .competency-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 10px;
+        }
+        
+        .rating-badge {
+            display: inline-block;
+            background: #3b82f6;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+        
+        .text-content {
+            background: white;
+            padding: 15px;
+            border: 1px solid #e5e7eb;
+            border-radius: 4px;
+            margin-top: 10px;
+            white-space: pre-wrap;
+            font-size: 14px;
+            line-height: 1.8;
+        }
+        
+        .goal-item {
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+        }
+        
+        .goal-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 15px;
+        }
+        
+        .goal-details {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .goal-detail-item {
+            font-size: 14px;
+        }
+        
+        .goal-detail-label {
+            font-weight: 600;
+            color: #4b5563;
+            margin-bottom: 4px;
+        }
+        
+        .manager-section {
+            background: #eff6ff;
+            border-left: 4px solid #2563eb;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+        }
+        
+        .signature-section {
+            background: #f9fafb;
+            border: 2px solid #d1d5db;
+            padding: 20px;
+            margin-top: 30px;
+            border-radius: 4px;
+        }
+        
+        .signature-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 15px 0;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        .signature-item:last-child {
+            border-bottom: none;
+        }
+        
+        .signature-label {
+            font-weight: 600;
+            color: #4b5563;
+        }
+        
+        .signature-value {
+            color: #1f2937;
+            font-weight: 500;
+        }
+        
+        .footer {
+            margin-top: 60px;
+            padding-top: 20px;
+            border-top: 2px solid #e5e7eb;
+            font-size: 12px;
+            color: #6b7280;
+            text-align: center;
+        }
+        
+        @media print {
+            body {
+                padding: 20px;
+            }
+            
+            .section {
+                page-break-inside: avoid;
+            }
+            
+            .no-print {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="audit-header">
+        <h1>Performance Appraisal - Complete Audit Document</h1>
+        <div class="subtitle">seedigital.ai Employee Performance Review System</div>
+    </div>
+    
+    <div class="audit-meta">
+        <h2>Document Metadata</h2>
+        <div class="meta-grid">
+            <div class="meta-item">
+                <span class="meta-label">Appraisal ID</span>
+                <span class="meta-value">${data.appraisalId || 'Not Assigned'}</span>
+            </div>
+            <div class="meta-item">
+                <span class="meta-label">Export Date</span>
+                <span class="meta-value">${exportDateFormatted}</span>
+            </div>
+            <div class="meta-item">
+                <span class="meta-label">Employee Name</span>
+                <span class="meta-value">${data.employeeInfo.name || 'Not Provided'}</span>
+            </div>
+            <div class="meta-item">
+                <span class="meta-label">Employee ID</span>
+                <span class="meta-value">${data.employeeInfo.id || 'Not Provided'}</span>
+            </div>
+            <div class="meta-item">
+                <span class="meta-label">Department</span>
+                <span class="meta-value">${data.employeeInfo.department || 'Not Provided'}</span>
+            </div>
+            <div class="meta-item">
+                <span class="meta-label">Manager Name</span>
+                <span class="meta-value">${data.employeeInfo.managerName || 'Not Provided'}</span>
+            </div>
+            <div class="meta-item">
+                <span class="meta-label">Review Period</span>
+                <span class="meta-value">${data.employeeInfo.reviewPeriod || 'Not Provided'}</span>
+            </div>
+            <div class="meta-item">
+                <span class="meta-label">Review Date</span>
+                <span class="meta-value">${data.employeeInfo.reviewDate || 'Not Provided'}</span>
+            </div>
+            <div class="meta-item">
+                <span class="meta-label">Document Status</span>
+                <span class="meta-value">${data.status || 'Draft'}</span>
+            </div>
+            <div class="meta-item">
+                <span class="meta-label">Last Saved</span>
+                <span class="meta-value">${data.savedDate ? new Date(data.savedDate).toLocaleString() : 'Not Saved'}</span>
+            </div>
+        </div>
+    </div>
+    
+    ${data.competencies && data.competencies.length > 0 ? `
+    <div class="section">
+        <h2 class="section-header">Core Competencies Assessment</h2>
+        ${data.competencies.map((comp, idx) => `
+            <div class="competency-item">
+                <div class="competency-name">${idx + 1}. ${comp.name || 'Unnamed Competency'}</div>
+                <div class="rating-badge">Rating: ${comp.rating || 'Not Rated'}/5</div>
+                <div class="text-content">${comp.comments || 'No comments provided.'}</div>
+            </div>
+        `).join('')}
+    </div>
+    ` : ''}
+    
+    <div class="section">
+        <h2 class="section-header">Self-Reflection (Previous 6 Months)</h2>
+        
+        <div style="margin-bottom: 25px;">
+            <div style="font-weight: 600; color: #4b5563; margin-bottom: 8px; font-size: 14px;">Key Achievements</div>
+            <div class="text-content">${data.selfReflection.keyAchievements || 'Not provided.'}</div>
+        </div>
+        
+        <div style="margin-bottom: 25px;">
+            <div style="font-weight: 600; color: #4b5563; margin-bottom: 8px; font-size: 14px;">Challenges and Learnings</div>
+            <div class="text-content">${data.selfReflection.challengesLearnings || 'Not provided.'}</div>
+        </div>
+        
+        <div style="margin-bottom: 25px;">
+            <div style="font-weight: 600; color: #4b5563; margin-bottom: 8px; font-size: 14px;">Areas for Improvement</div>
+            <div class="text-content">${data.selfReflection.areasForImprovement || 'Not provided.'}</div>
+        </div>
+    </div>
+    
+    ${data.goals && data.goals.length > 0 ? `
+    <div class="section">
+        <h2 class="section-header">Performance Goals (Next 6 Months)</h2>
+        ${data.goals.map((goal, idx) => `
+            <div class="goal-item">
+                <div class="goal-title">Goal ${idx + 1}: ${goal.title || 'Untitled Goal'}</div>
+                <div class="text-content" style="margin-bottom: 15px;">${goal.description || 'No description provided.'}</div>
+                <div class="goal-details">
+                    <div class="goal-detail-item">
+                        <div class="goal-detail-label">Success Criteria</div>
+                        <div>${goal.successCriteria || 'Not specified.'}</div>
+                    </div>
+                    <div class="goal-detail-item">
+                        <div class="goal-detail-label">Target Date</div>
+                        <div>${goal.targetDate || 'Not specified.'}</div>
+                    </div>
+                    <div class="goal-detail-item">
+                        <div class="goal-detail-label">Priority</div>
+                        <div style="text-transform: capitalize;">${goal.priority || 'Not specified.'}</div>
+                    </div>
+                </div>
+            </div>
+        `).join('')}
+    </div>
+    ` : ''}
+    
+    <div class="section">
+        <h2 class="section-header">Manager Assessment</h2>
+        <div class="manager-section">
+            <div style="margin-bottom: 20px;">
+                <div style="font-weight: 600; color: #4b5563; margin-bottom: 8px; font-size: 14px;">Overall Performance Rating</div>
+                <div class="rating-badge">${data.managerAssessment.rating || 'Not Rated'}/5</div>
+            </div>
+            
+            <div style="margin-bottom: 25px;">
+                <div style="font-weight: 600; color: #4b5563; margin-bottom: 8px; font-size: 14px;">Competency Feedback</div>
+                <div class="text-content">${data.managerAssessment.competencyFeedback || 'Not provided.'}</div>
+            </div>
+            
+            <div style="margin-bottom: 25px;">
+                <div style="font-weight: 600; color: #4b5563; margin-bottom: 8px; font-size: 14px;">Strengths</div>
+                <div class="text-content">${data.managerAssessment.strengths || 'Not provided.'}</div>
+            </div>
+            
+            <div style="margin-bottom: 25px;">
+                <div style="font-weight: 600; color: #4b5563; margin-bottom: 8px; font-size: 14px;">Development Areas</div>
+                <div class="text-content">${data.managerAssessment.developmentAreas || 'Not provided.'}</div>
+            </div>
+            
+            <div style="margin-bottom: 25px;">
+                <div style="font-weight: 600; color: #4b5563; margin-bottom: 8px; font-size: 14px;">Recommendations</div>
+                <div class="text-content">${data.managerAssessment.recommendations || 'Not provided.'}</div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="section">
+        <h2 class="section-header">Signatures and Acknowledgment</h2>
+        <div class="signature-section">
+            <div class="signature-item">
+                <span class="signature-label">Manager Signature</span>
+                <span class="signature-value">${data.managerAssessment.signature || 'Not signed'}</span>
+            </div>
+            <div class="signature-item">
+                <span class="signature-label">Manager Signature Date</span>
+                <span class="signature-value">${data.managerAssessment.signatureDate || 'Not dated'}</span>
+            </div>
+            <div class="signature-item">
+                <span class="signature-label">Employee Acknowledgment</span>
+                <span class="signature-value">${data.employeeAcknowledgment.acknowledged ? 'Yes - Acknowledged' : 'Not Acknowledged'}</span>
+            </div>
+            <div class="signature-item">
+                <span class="signature-label">Employee Signature</span>
+                <span class="signature-value">${data.employeeAcknowledgment.signature || 'Not signed'}</span>
+            </div>
+            <div class="signature-item">
+                <span class="signature-label">Employee Signature Date</span>
+                <span class="signature-value">${data.employeeAcknowledgment.signatureDate || 'Not dated'}</span>
+            </div>
+        </div>
+    </div>
+    
+    <div class="footer">
+        <p><strong>Document Generated:</strong> ${exportDateFormatted}</p>
+        <p><strong>Appraisal ID:</strong> ${data.appraisalId || 'Not Assigned'}</p>
+        <p>This document is a complete record of the performance appraisal and is suitable for SOC 2 audit purposes.</p>
+        <p style="margin-top: 10px; font-size: 11px; color: #9ca3af;">seedigital.ai Performance Appraisal System | Confidential Document</p>
+    </div>
+</body>
+</html>
+            `;
+
+            // Create a new window with the audit document
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(auditDocument);
+            printWindow.document.close();
+            
+            // Wait for content to load, then print
+            printWindow.onload = function() {
+                setTimeout(() => {
+                    printWindow.print();
+                }, 250);
+            };
+            
+            // Also download as HTML file
+            const blob = new Blob([auditDocument], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `Performance_Appraisal_SOC2_Audit_${data.appraisalId || 'UNKNOWN'}_${new Date().toISOString().split('T')[0]}.html`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            console.log('Audit document exported successfully');
+        }
+        window.exportForSOC2Audit = exportForSOC2Audit;
+
         // Save to SharePoint API (requires Microsoft Graph API)
         async function saveToSharePointAPI(jsonData, filename) {
             // This function requires Microsoft Graph API authentication
@@ -836,9 +2277,17 @@
                 // Upload to SharePoint using Microsoft Graph API
                 const siteUrl = sharePointConfig.siteUrl;
                 const libraryName = sharePointConfig.libraryName;
+                const folderPath = sharePointConfig.folderPath || '';
+                
+                // Construct file path with optional folder
+                let filePath = libraryName;
+                if (folderPath) {
+                    filePath += '/' + folderPath;
+                }
+                filePath += '/' + filename;
                 
                 // Construct Graph API endpoint
-                const graphEndpoint = `https://graph.microsoft.com/v1.0/sites/${encodeURIComponent(siteUrl)}/drive/root:/${libraryName}/${filename}:/content`;
+                const graphEndpoint = `https://graph.microsoft.com/v1.0/sites/${encodeURIComponent(siteUrl)}/drive/root:/${filePath}:/content`;
                 
                 const uploadResponse = await fetch(graphEndpoint, {
                     method: 'PUT',
@@ -937,8 +2386,10 @@
             // Goals
             if (data.goals && data.goals.length > 0) {
                 initializeGoals();
+                // Use original function to avoid recursion
+                const originalAddGoal = addGoal;
                 data.goals.forEach((goal, idx) => {
-                    if (idx > 0) addGoal();
+                    if (idx > 0) originalAddGoal();
                     document.getElementById(`goal-title-${idx}`).value = goal.title || '';
                     document.getElementById(`goal-description-${idx}`).value = goal.description || '';
                     document.getElementById(`goal-success-${idx}`).value = goal.successCriteria || '';
@@ -968,36 +2419,212 @@
             }
         }
 
-        // Local storage functions
+        // Local storage functions with unique ID
         function saveToLocalStorage() {
+            // Ensure Appraisal ID exists before saving
+            if (!currentAppraisalId) {
+                currentAppraisalId = getAppraisalId();
+                document.getElementById('appraisalId').textContent = currentAppraisalId;
+            }
+            
             const data = collectAppraisalData();
-            localStorage.setItem('performanceAppraisal', JSON.stringify(data));
+            // Ensure appraisal ID is always in the data
+            data.appraisalId = currentAppraisalId;
+            data.lastSaved = new Date().toISOString();
+            
+            // Mark as draft if not complete (auto-save always saves as draft initially)
+            const isComplete = checkFormCompletion(data);
+            if (!isComplete) {
+                data.status = 'draft';
+            } else {
+                data.status = 'completed';
+            }
+            
+            // Save with unique ID as key
+            localStorage.setItem(`appraisal_${currentAppraisalId}`, JSON.stringify(data));
+            
+            // Also save a list of all appraisal IDs with metadata
+            let appraisalList = JSON.parse(localStorage.getItem('appraisal_list') || '[]');
+            const existingIndex = appraisalList.findIndex(item => 
+                typeof item === 'string' ? item === currentAppraisalId : item.id === currentAppraisalId
+            );
+            
+            const appraisalMetadata = {
+                id: currentAppraisalId,
+                employeeName: document.getElementById('employeeName').value || '',
+                managerName: document.getElementById('managerName').value || '',
+                reviewPeriod: document.getElementById('reviewPeriod').value || '',
+                lastSaved: data.lastSaved
+            };
+            
+            if (existingIndex >= 0) {
+                appraisalList[existingIndex] = appraisalMetadata;
+            } else {
+                appraisalList.push(appraisalMetadata);
+            }
+            
+            localStorage.setItem('appraisal_list', JSON.stringify(appraisalList));
+            
+            updateLastSavedTime();
         }
 
-        function loadFromLocalStorage() {
-            const saved = localStorage.getItem('performanceAppraisal');
+        function loadAppraisalById(appraisalId) {
+            const saved = localStorage.getItem(`appraisal_${appraisalId}`);
             if (saved) {
                 try {
                     const data = JSON.parse(saved);
                     populateAppraisalData(data);
+                    updateLastSavedTime(data.lastSaved);
+                    return true;
                 } catch (error) {
-                    console.error('Error loading from localStorage:', error);
+                    console.error('Error loading appraisal:', error);
+                    return false;
                 }
+            }
+            return false;
+        }
+
+        function updateLastSavedTime(isoTime = null) {
+            const lastSavedEl = document.getElementById('lastSaved');
+            if (isoTime) {
+                const savedDate = new Date(isoTime);
+                lastSavedEl.textContent = `Last saved: ${savedDate.toLocaleString()}`;
+            } else {
+                const now = new Date();
+                lastSavedEl.textContent = `Last saved: ${now.toLocaleString()}`;
             }
         }
 
-        // Auto-save to localStorage
+        // Auto-save to localStorage with debouncing
+        let saveTimeout;
+        function debouncedSave() {
+            clearTimeout(saveTimeout);
+            saveTimeout = setTimeout(() => {
+                saveToLocalStorage();
+            }, 1000); // Save 1 second after last change
+        }
+
         document.addEventListener('input', function(e) {
             if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') {
-                saveToLocalStorage();
+                debouncedSave();
             }
         });
 
         document.addEventListener('change', function(e) {
-            if (e.target.type === 'checkbox') {
-                saveToLocalStorage();
+            if (e.target.type === 'checkbox' || e.target.type === 'radio') {
+                debouncedSave();
             }
         });
+        
+        // Share appraisal link
+        function shareAppraisal() {
+            if (!currentAppraisalId) {
+                currentAppraisalId = getAppraisalId();
+            }
+            
+            // Save current data before sharing
+            saveToLocalStorage();
+            
+            // Get current page URL
+            const currentUrl = new URL(window.location.href);
+            currentUrl.searchParams.set('id', currentAppraisalId);
+            const shareUrl = currentUrl.toString();
+            
+            // Copy to clipboard
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(shareUrl).then(() => {
+                    showSaveStatus('Link copied to clipboard!', 'green');
+                }).catch(() => {
+                    // Fallback for older browsers
+                    copyToClipboardFallback(shareUrl);
+                });
+            } else {
+                copyToClipboardFallback(shareUrl);
+            }
+        }
+        
+        function copyToClipboardFallback(text) {
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            textarea.style.position = 'fixed';
+            textarea.style.opacity = '0';
+            document.body.appendChild(textarea);
+            textarea.select();
+            try {
+                document.execCommand('copy');
+                showSaveStatus('Link copied to clipboard!', 'green');
+            } catch (err) {
+                showSaveStatus('Could not copy. Link: ' + text, 'orange');
+            }
+            document.body.removeChild(textarea);
+        }
+        
+        // Send email notification
+        function sendEmailNotification() {
+            if (!currentAppraisalId) {
+                currentAppraisalId = getAppraisalId();
+            }
+            
+            // Save current data before sharing
+            saveToLocalStorage();
+            
+            // Get current page URL
+            const currentUrl = new URL(window.location.href);
+            currentUrl.searchParams.set('id', currentAppraisalId);
+            const shareUrl = currentUrl.toString();
+            
+            // Get employee and manager names
+            const employeeName = document.getElementById('employeeName').value || 'Employee';
+            const managerName = document.getElementById('managerName').value || 'Manager';
+            
+            // Determine who is sending (check if employee or manager sections are filled)
+            const employeeFilled = document.getElementById('keyAchievements').value || 
+                                    document.getElementById('employeeName').value;
+            const managerFilled = document.getElementById('managerSignature').value || 
+                                  document.getElementById('managerStrengths').value;
+            
+            let recipientName, recipientRole, senderRole, subject, body;
+            
+            if (employeeFilled && !managerFilled) {
+                // Employee sending to manager
+                recipientName = managerName;
+                recipientRole = 'Manager';
+                senderRole = 'Employee';
+                subject = `Performance Appraisal - ${employeeName} - Ready for Manager Review`;
+                body = `Dear ${recipientName},\n\n` +
+                       `I have completed my self-assessment for the performance appraisal period.\n\n` +
+                       `Please review and complete your manager assessment section using the link below:\n\n` +
+                       `${shareUrl}\n\n` +
+                       `Appraisal ID: ${currentAppraisalId}\n\n` +
+                       `Thank you,\n${employeeName}`;
+            } else if (managerFilled || !employeeFilled) {
+                // Manager sending to employee (or initial setup)
+                recipientName = employeeName;
+                recipientRole = 'Employee';
+                senderRole = 'Manager';
+                subject = `Performance Appraisal - ${employeeName} - Action Required`;
+                body = `Dear ${recipientName},\n\n` +
+                       `Please complete your performance appraisal using the link below:\n\n` +
+                       `${shareUrl}\n\n` +
+                       `Appraisal ID: ${currentAppraisalId}\n\n` +
+                       `Please fill in your self-assessment and self-reflection sections. Once complete, I will review and complete the manager assessment.\n\n` +
+                       `Thank you,\n${managerName}`;
+            }
+            
+            // Create mailto link
+            const mailtoLink = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+            
+            // Try to open email client
+            window.location.href = mailtoLink;
+            
+            // Also copy email template to clipboard as fallback
+            const emailTemplate = `Subject: ${subject}\n\n${body}`;
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(emailTemplate);
+            }
+            
+            showSaveStatus('Email template opened. Link also copied to clipboard.', 'blue');
+        }
 
         // Download file
         function downloadFile(content, filename, contentType) {
