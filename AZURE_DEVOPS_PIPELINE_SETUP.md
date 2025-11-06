@@ -1,6 +1,13 @@
 # Azure DevOps Pipeline Setup Guide for Engineers
 
-This guide provides detailed instructions for engineers setting up the Azure DevOps CI/CD pipeline for the Performance Appraisal System.
+This guide provides detailed instructions for engineers setting up the Azure DevOps CI/CD pipeline for the **Performance Appraisal System**.
+
+## Project Information
+
+- **Project Name**: `seedigital-performance-appraisal-system`
+- **Purpose**: Employee Performance Appraisal System for seedigital.ai
+- **Application Type**: Static web application
+- **Deployment Target**: Azure Static Web Apps or Azure App Service
 
 ## Prerequisites
 
@@ -38,8 +45,8 @@ The pipeline file `azure-pipelines.yml` is located in the repository root. Revie
    - Click "Create"
    - Configure:
      - **Subscription**: Your Azure subscription
-     - **Resource Group**: Create new or use existing
-     - **Name**: `performance-appraisal-system` (or your preferred name)
+     - **Resource Group**: Create new or use existing (e.g., `rg-performance-appraisal-system`)
+     - **Name**: `seedigital-performance-appraisal-system` (must be globally unique)
      - **Plan type**: Free or Standard
      - **Region**: Choose closest region
      - **Source**: "Other" (we'll configure via Azure DevOps)
@@ -58,8 +65,8 @@ The pipeline file `azure-pipelines.yml` is located in the repository root. Revie
    - Click "Create"
    - Configure:
      - **Subscription**: Your Azure subscription
-     - **Resource Group**: Create new or use existing
-     - **Name**: `performance-appraisal-system` (must be globally unique)
+     - **Resource Group**: Create new or use existing (e.g., `rg-performance-appraisal-system`)
+     - **Name**: `seedigital-performance-appraisal-system` (must be globally unique)
      - **Publish**: Code
      - **Runtime stack**: Static HTML
      - **Region**: Choose closest region
@@ -82,16 +89,16 @@ The pipeline file `azure-pipelines.yml` is located in the repository root. Revie
    For **Azure Static Web Apps**:
    ```
    AZURE_STATIC_WEB_APPS_API_TOKEN = <deployment-token-from-step-2>
-   azureStaticWebAppName = performance-appraisal-system
+   azureStaticWebAppName = seedigital-performance-appraisal-system
    azureSubscription = <your-azure-subscription-id>
-   resourceGroupName = <your-resource-group-name>
+   resourceGroupName = <your-resource-group-name> (e.g., rg-performance-appraisal-system)
    ```
 
    For **Azure App Service**:
    ```
    azureSubscription = <your-azure-subscription-id>
-   azureStaticWebAppName = performance-appraisal-system
-   resourceGroupName = <your-resource-group-name>
+   azureStaticWebAppName = seedigital-performance-appraisal-system
+   resourceGroupName = <your-resource-group-name> (e.g., rg-performance-appraisal-system)
    ```
 
 4. **Mark Secrets as Secure**
@@ -126,7 +133,7 @@ If using Azure App Service, you need to create a service connection:
 
 2. **Select Repository**
    - Choose "Azure Repos Git"
-   - Select your repository: `performance-appraisal-system`
+   - Select your repository: `seedigital-performance-appraisal-system`
    - Select branch: `main`
 
 3. **Configure Pipeline**

@@ -1,6 +1,12 @@
 # Azure DevOps Setup Guide - Performance Appraisal System
 
-This guide will help you set up the Performance Appraisal System in Azure DevOps and configure bi-directional sync with GitHub.
+This guide will help you set up the **Performance Appraisal System** in Azure DevOps and configure bi-directional sync with GitHub.
+
+## Project Information
+
+- **Project Name**: `seedigital-performance-appraisal-system`
+- **Purpose**: Employee Performance Appraisal System for seedigital.ai
+- **Application**: Web-based performance review platform with SharePoint integration
 
 ## Prerequisites
 
@@ -21,17 +27,17 @@ This guide will help you set up the Performance Appraisal System in Azure DevOps
 
 3. **Create a New Project**
    - Click "New Project" or navigate to your existing project
-   - Project name: `performance-appraisal-system` (or your preferred name)
-   - Description: "seedigital.ai Performance Appraisal System - Employee Performance Review Platform"
-   - Visibility: Choose Private or Public
-   - Version control: Select "Git"
-   - Work item process: Choose "Agile" (or your preference)
+   - **Project name**: `seedigital-performance-appraisal-system`
+   - **Description**: "seedigital.ai Performance Appraisal System - Employee Performance Review Platform"
+   - **Visibility**: Choose Private or Public
+   - **Version control**: Select "Git"
+   - **Work item process**: Choose "Agile" (or your preference)
    - Click "Create"
 
 4. **Get Repository URL**
    - After creating the project, navigate to "Repos" > "Files"
    - Click "Clone" button
-   - Copy the HTTPS URL (e.g., `https://dev.azure.com/seedigitalAI/performance-appraisal-system/_git/performance-appraisal-system`)
+   - Copy the HTTPS URL (e.g., `https://dev.azure.com/seedigitalAI/seedigital-performance-appraisal-system/_git/seedigital-performance-appraisal-system`)
 
 ## Step 2: Add Azure DevOps Remote to Your Local Repository
 
@@ -44,7 +50,7 @@ cd /Users/craigmarris/seedigital-ai-performance-appraisal
 git remote -v
 
 # Add Azure DevOps as a remote (replace with your actual URL)
-git remote add azure https://dev.azure.com/YOUR_ORG/performance-appraisal-system/_git/performance-appraisal-system
+git remote add azure https://dev.azure.com/YOUR_ORG/seedigital-performance-appraisal-system/_git/seedigital-performance-appraisal-system
 
 # Verify remotes (you should see both 'origin' for GitHub and 'azure' for Azure DevOps)
 git remote -v
