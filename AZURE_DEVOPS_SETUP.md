@@ -2,53 +2,118 @@
 
 This guide will help you set up the seedigital.ai Performance Appraisal System project in Azure DevOps.
 
-## Prerequisites
+## Setup Method for seedigital-ai-performance-appraisal-system
 
-- Azure DevOps account and organization
-- Access to create repositories in your Azure DevOps organization
-- Git installed on your machine
+### 1. Initial Setup (Manual)
 
-## Step 1: Create Azure DevOps Repository
+#### Step 1: Create Azure DevOps Project
+
+- **Organization**: `seedigitalAI`
+- **Project**: `seedigital-performance-appraisal-system`
+- **Repository**: `seedigital-performance-appraisal-system`
 
 1. **Log in to Azure DevOps**
    - Go to: https://dev.azure.com
-   - Sign in with your Microsoft account
+   - Sign in with your Microsoft account (seedigital.ai account)
 
-2. **Create or Select Organization**
-   - If you don't have an organization, create one
-   - Note your organization name (e.g., `seedigitalAI`)
+2. **Navigate to Organization**
+   - Select organization: `seedigitalAI`
 
 3. **Create a New Project**
-   - Click "New Project" or navigate to your existing project
-   - Project name: `seedigital-performance-appraisal-system` (or your preferred name)
-   - Description: "seedigital.ai Performance Appraisal System - Employee Performance Review Platform"
-   - Visibility: Choose Private or Public
-   - Version control: Select "Git"
+   - Click "New Project"
+   - **Project name**: `seedigital-performance-appraisal-system`
+   - **Description**: "seedigital.ai Performance Appraisal System - Employee Performance Review Platform"
+   - **Visibility**: Choose Private or Public
+   - **Version control**: Select "Git"
    - Click "Create"
 
 4. **Get Repository URL**
    - After creating the project, navigate to "Repos" > "Files"
    - Click "Clone" button
-   - Copy the HTTPS or SSH URL (e.g., `https://dev.azure.com/seedigitalAI/seedigital-performance-appraisal-system/_git/seedigital-performance-appraisal-system`)
+   - Copy the HTTPS URL: `https://dev.azure.com/seedigitalAI/seedigital-performance-appraisal-system/_git/seedigital-performance-appraisal-system`
 
-## Step 2: Add Azure DevOps Remote
+#### Step 2: Add Azure Remote to Local Repository
 
-After creating the repository in Azure DevOps, run these commands:
+Run these commands in your local repository:
 
 ```bash
 cd /Users/craigmarris/seedigital-ai-performance-appraisal
 
-# Add Azure DevOps as a remote (replace with your actual URL)
-git remote add azure https://dev.azure.com/YOUR_ORG/YOUR_PROJECT/_git/seedigital-performance-appraisal-system
+# Add Azure DevOps as a remote
+git remote add azure https://dev.azure.com/seedigitalAI/seedigital-performance-appraisal-system/_git/seedigital-performance-appraisal-system
 
 # Verify remotes
 git remote -v
+```
 
-# Push to Azure DevOps
+#### Step 3: Initial Push
+
+```bash
+# Push main branch to Azure DevOps
 git push -u azure main
 ```
 
-## Step 3: Verify Code is in Azure DevOps
+### 2. Automatic Sync (GitHub Actions)
+
+**Method**: GitHub Actions workflow that syncs GitHub → Azure DevOps
+
+**Workflow file**: `.github/workflows/sync-to-azure-devops.yml`
+
+#### How It Works
+
+- **Trigger**: Automatically runs on every push to `main` branch
+- **Process**:
+  1. Checks out the GitHub repository
+  2. Adds Azure DevOps as a remote
+  3. Pushes to Azure DevOps `main` branch
+
+#### Secrets Required in GitHub
+
+Go to your GitHub repository: **Settings > Secrets and variables > Actions**
+
+Add these secrets:
+
+- `AZURE_DEVOPS_PAT` - Personal Access Token from Azure DevOps
+  - Go to Azure DevOps: User Settings > Personal Access Tokens
+  - Create new token with "Code (read & write)" permissions
+  - Copy the token
+
+- `AZURE_DEVOPS_ORG` - Organization name: `seedigitalAI`
+
+- `AZURE_DEVOPS_PROJECT` - Project name: `seedigital-performance-appraisal-system`
+
+- `AZURE_DEVOPS_REPO` - Repository name: `seedigital-performance-appraisal-system`
+
+#### GitHub Actions Workflow
+
+The workflow file `.github/workflows/sync-to-azure-devops.yml` is already created in the repository. Once you add the secrets above, it will automatically sync on every push to `main`.
+
+#### Manual Trigger
+
+You can also manually trigger the sync:
+- Go to GitHub repository → **Actions** tab
+- Select "Sync to Azure DevOps" workflow
+- Click "Run workflow"
+
+### 3. Current Remotes
+
+After setup, your remotes should be:
+
+- `origin` → GitHub (`https://github.com/YOUR_USERNAME/seedigital-ai-performance-appraisal.git`)
+- `azure` → Azure DevOps (`https://dev.azure.com/seedigitalAI/seedigital-performance-appraisal-system/_git/seedigital-performance-appraisal-system`)
+
+To verify:
+```bash
+git remote -v
+```
+
+### 4. Workflow
+
+1. **Push to GitHub** → GitHub Actions runs → Auto-syncs to Azure DevOps
+2. **Manual push to Azure DevOps** → Requires PR (branch protection)
+3. **Both repos stay in sync automatically**
+
+## Step 4: Verify Code is in Azure DevOps
 
 1. Go to your Azure DevOps project
 2. Navigate to "Repos" > "Files"
@@ -58,44 +123,6 @@ git push -u azure main
    - `.gitignore`
    - `azure-pipelines.yml`
    - All documentation files
-
-## Step 4: Set Up Automatic Sync from GitHub to Azure DevOps
-
-To automatically sync GitHub → Azure DevOps whenever you push to GitHub, set up GitHub Actions:
-
-### Prerequisites
-
-1. **Create Azure DevOps Personal Access Token (PAT)**
-   - Go to Azure DevOps: User Settings > Personal Access Tokens
-   - Create new token with "Code (read & write)" permissions
-   - Copy the token (you'll need it for GitHub secrets)
-
-2. **Add Secrets to GitHub Repository**
-   - Go to your GitHub repository: Settings > Secrets and variables > Actions
-   - Click "New repository secret" and add these secrets:
-     - `AZURE_DEVOPS_PAT` - Your Azure DevOps PAT token
-     - `AZURE_DEVOPS_ORG` - Your Azure DevOps organization name (e.g., `seedigitalAI`)
-     - `AZURE_DEVOPS_PROJECT` - Your Azure DevOps project name (e.g., `seedigital-performance-appraisal-system`)
-     - `AZURE_DEVOPS_REPO` - Your Azure DevOps repository name (e.g., `seedigital-performance-appraisal-system`)
-
-3. **GitHub Actions Workflow is Already Created**
-   - The workflow file `.github/workflows/sync-to-azure-devops.yml` is already in the repository
-   - Once you add the secrets above, it will automatically sync on every push to `main`
-
-### How It Works
-
-- When you push to GitHub's `main` branch, GitHub Actions automatically:
-  1. Checks out the code
-  2. Adds Azure DevOps as a remote
-  3. Pushes the changes to Azure DevOps `main` branch
-  4. Both repositories stay in sync automatically
-
-### Manual Trigger
-
-You can also manually trigger the sync:
-- Go to GitHub repository → Actions tab
-- Select "Sync to Azure DevOps" workflow
-- Click "Run workflow"
 
 ## Step 5: Create Deployment Pipeline
 
@@ -184,7 +211,7 @@ git remote -v
 
 # Remove and re-add remote if needed
 git remote remove azure
-git remote add azure YOUR_AZURE_DEVOPS_URL
+git remote add azure https://dev.azure.com/seedigitalAI/seedigital-performance-appraisal-system/_git/seedigital-performance-appraisal-system
 
 # Force push (use with caution)
 git push -u azure main --force
