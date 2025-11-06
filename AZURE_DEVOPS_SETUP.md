@@ -29,8 +29,10 @@ This guide will help you set up the seedigital.ai Performance Appraisal System p
 
 4. **Get Repository URL**
    - After creating the project, navigate to "Repos" > "Files"
-   - Click "Clone" button
-   - Copy the HTTPS URL: `https://dev.azure.com/seedigitalAI/seedigital-performance-appraisal-system/_git/seedigital-performance-appraisal-system`
+   - You'll see several options. Since you already have the repository in GitHub, choose:
+     - **"Push an existing repository from command line"** (or similar option)
+   - Copy the HTTPS URL shown (e.g., `https://dev.azure.com/seedigitalAI/seedigital-performance-appraisal-system/_git/seedigital-performance-appraisal-system`)
+   - This is the URL you'll use to add Azure DevOps as a remote
 
 #### Step 2: Add Azure Remote to Local Repository
 
