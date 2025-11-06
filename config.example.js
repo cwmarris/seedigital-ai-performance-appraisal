@@ -30,14 +30,16 @@ export const appConfig = {
         azureOpenAI: {
             endpoint: 'https://YOUR_RESOURCE.openai.azure.com',
             apiKey: 'YOUR_API_KEY',
-            deployment: 'gpt-4', // or 'gpt-35-turbo'
-            apiVersion: '2023-12-01-preview'
+            deployment: 'gpt-4o', // Use GPT-4o (latest), or 'gpt-4-turbo', 'gpt-4', or 'gpt-35-turbo'
+            // Note: Update to 'gpt-5.0' when available
+            apiVersion: '2024-02-15-preview' // Use latest API version
         },
         
         // Option 2: OpenAI API
         openAI: {
             apiKey: 'YOUR_OPENAI_API_KEY',
-            model: 'gpt-4' // or 'gpt-3.5-turbo'
+            model: 'gpt-4o' // Use GPT-4o (latest), or 'gpt-4-turbo', 'gpt-4', or 'gpt-3.5-turbo'
+            // Note: Update to 'gpt-5.0' when available
         },
         
         // Option 3: Mock (for testing without AI service)

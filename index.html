@@ -1340,7 +1340,8 @@
 
             try {
                 // For demo purposes, we'll use a mock AI response
-                // In production, you would call Azure OpenAI, OpenAI API, or similar
+                // In production, you would call Azure OpenAI (GPT-4o/GPT-4 Turbo), OpenAI API, or similar
+                // Note: Update to GPT-5.0 when available
                 const response = await mockAIResponse(fieldId, context, field.value);
                 
                 aiDiv.innerHTML = `

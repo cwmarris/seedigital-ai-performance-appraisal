@@ -83,21 +83,21 @@ For AI assistance to work, you need to integrate with an AI service. Options:
 ### Option A: Azure OpenAI
 
 1. Create an Azure OpenAI resource in Azure Portal
-2. Deploy a model (e.g., GPT-4 or GPT-3.5)
+2. Deploy a model (e.g., GPT-4o, GPT-4 Turbo, or GPT-4)
 3. Get your API key and endpoint
 4. Update the `mockAIResponse` function to call Azure OpenAI API
 
 Example:
 ```javascript
 async function mockAIResponse(fieldId, context, currentValue) {
-    const response = await fetch('YOUR_AZURE_OPENAI_ENDPOINT/openai/deployments/YOUR_DEPLOYMENT/completions?api-version=2023-12-01-preview', {
+    const response = await fetch('YOUR_AZURE_OPENAI_ENDPOINT/openai/deployments/YOUR_DEPLOYMENT/completions?api-version=2024-02-15-preview', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
             'api-key': 'YOUR_API_KEY'
         },
         body: JSON.stringify({
-            model: 'gpt-4',
+            model: 'gpt-4o', // Use GPT-4o (latest), or 'gpt-4-turbo', or 'gpt-4'
             messages: [{
                 role: 'user',
                 content: `Context: ${context}\n\nCurrent input: ${currentValue}\n\nProvide helpful suggestions for this performance appraisal section.`
