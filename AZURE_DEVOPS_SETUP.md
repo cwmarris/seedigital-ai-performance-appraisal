@@ -34,26 +34,50 @@ This guide will help you set up the seedigital.ai Performance Appraisal System p
    - Copy the HTTPS URL shown (e.g., `https://dev.azure.com/seedigitalAI/seedigital-performance-appraisal-system/_git/seedigital-performance-appraisal-system`)
    - This is the URL you'll use to add Azure DevOps as a remote
 
-#### Step 2: Add Azure Remote to Local Repository
+#### Step 2: Create Azure DevOps Personal Access Token (PAT)
+
+Before adding the remote, you need to create a Personal Access Token:
+
+1. **Go to Azure DevOps**: https://dev.azure.com/seedigitalAI
+2. **User Settings** (click your profile icon in top right) > **Personal Access Tokens**
+3. **Create New Token**:
+   - Name: `Performance Appraisal System - Git Push`
+   - Organization: `seedigitalAI`
+   - Expiration: Choose your preferred duration (e.g., 90 days)
+   - Scopes: Select **"Code (read & write)"**
+   - Click **"Create"**
+4. **Copy the token** (you'll only see it once!)
+
+#### Step 3: Add Azure Remote to Local Repository
 
 Run these commands in your local repository:
 
 ```bash
 cd /Users/craigmarris/seedigital-ai-performance-appraisal
 
-# Add Azure DevOps as a remote
-git remote add azure https://dev.azure.com/seedigitalAI/seedigital-performance-appraisal-system/_git/seedigital-performance-appraisal-system
+# Add Azure DevOps as a remote (replace YOUR_PAT_TOKEN with your actual token)
+git remote add azure https://YOUR_PAT_TOKEN@dev.azure.com/seedigitalAI/seedigital-performance-appraisal-system/_git/seedigital-performance-appraisal-system
 
 # Verify remotes
 git remote -v
 ```
 
-#### Step 3: Initial Push
+**Alternative (without token in URL)**: If you prefer not to put the token in the URL, you can use:
+```bash
+git remote add azure https://dev.azure.com/seedigitalAI/seedigital-performance-appraisal-system/_git/seedigital-performance-appraisal-system
+```
+Then when you push, Git will prompt for credentials - use your Azure DevOps username and the PAT token as the password.
+
+#### Step 4: Initial Push
 
 ```bash
 # Push main branch to Azure DevOps
 git push -u azure main
 ```
+
+If you didn't include the token in the URL, you'll be prompted for credentials:
+- **Username**: Your Azure DevOps username (or just use any non-empty string)
+- **Password**: Your PAT token (not your Azure DevOps password)
 
 ### 2. Automatic Sync (GitHub Actions)
 
