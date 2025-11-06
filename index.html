@@ -511,22 +511,28 @@
         }
 
         // SharePoint Configuration
-        // Update these values with your SharePoint site details
+        // Configured for seedigital.ai SharePoint site
         const sharePointConfig = {
-            // Your SharePoint site URL (full URL including /sites/...)
-            // Example: 'https://yourtenant.sharepoint.com/sites/PerformanceAppraisals'
-            // Or: 'https://yourtenant.sharepoint.com/sites/YourSiteName'
-            siteUrl: 'YOUR_SHAREPOINT_SITE_URL',
+            // SharePoint site URL
+            // Site: seeo (seedigital.ai SharePoint)
+            siteUrl: 'https://seedigitalai.sharepoint.com/sites/seeo',
             
             // The document library name where appraisals will be saved
-            // This is the name of the document library in SharePoint
-            // Example: 'Performance Appraisals' or 'Documents' or 'Shared Documents'
-            libraryName: 'Performance Appraisals',
+            // This is typically 'Shared Documents' or 'Documents' in SharePoint
+            libraryName: 'Shared Documents',
             
-            // Optional: Subfolder within the document library
-            // Leave as empty string '' if you want to save directly in the library root
-            // Example: 'Appraisals' or '2024' or 'Appraisals/2024'
-            folderPath: '' // e.g., 'Appraisals' or 'Appraisals/2024'
+            // Folder path within the document library
+            // This corresponds to the SharePoint folder where completed appraisals are stored
+            // Folder link: https://seedigitalai.sharepoint.com/:f:/s/seeo/EujwM32aUu9CpUawVBHjoNEBpxH3VSbQohz9ewEicUp-kg?e=WZz1Ys
+            // For Graph API, we'll use the folder ID or navigate to the folder
+            folderPath: '', // Will be set dynamically based on folder ID if needed
+            
+            // Folder ID from SharePoint link (for direct access)
+            // Extracted from: https://seedigitalai.sharepoint.com/:f:/s/seeo/EujwM32aUu9CpUawVBHjoNEBpxH3VSbQohz9ewEicUp-kg?e=WZz1Ys
+            folderId: 'EujwM32aUu9CpUawVBHjoNEBpxH3VSbQohz9ewEicUp-kg',
+            
+            // Direct folder link for user reference
+            folderLink: 'https://seedigitalai.sharepoint.com/:f:/s/seeo/EujwM32aUu9CpUawVBHjoNEBpxH3VSbQohz9ewEicUp-kg?e=WZz1Ys'
         };
 
         // Default competencies (up to 6)
@@ -2277,17 +2283,56 @@
                 // Upload to SharePoint using Microsoft Graph API
                 const siteUrl = sharePointConfig.siteUrl;
                 const libraryName = sharePointConfig.libraryName;
-                const folderPath = sharePointConfig.folderPath || '';
+                const folderId = sharePointConfig.folderId;
                 
-                // Construct file path with optional folder
-                let filePath = libraryName;
-                if (folderPath) {
-                    filePath += '/' + folderPath;
+                // Get the site ID first (required for Graph API)
+                const siteIdEndpoint = `https://graph.microsoft.com/v1.0/sites/${encodeURIComponent(siteUrl)}`;
+                const siteResponse = await fetch(siteIdEndpoint, {
+                    headers: {
+                        'Authorization': `Bearer ${response.accessToken}`
+                    }
+                });
+                
+                if (!siteResponse.ok) {
+                    throw new Error(`Failed to get site ID: ${siteResponse.statusText}`);
                 }
-                filePath += '/' + filename;
+                
+                const siteData = await siteResponse.json();
+                const siteId = siteData.id;
                 
                 // Construct Graph API endpoint
-                const graphEndpoint = `https://graph.microsoft.com/v1.0/sites/${encodeURIComponent(siteUrl)}/drive/root:/${filePath}:/content`;
+                // Try to use folder ID first, then fall back to path-based approach
+                let graphEndpoint;
+                if (folderId) {
+                    // Option 1: Try to get folder by ID and upload to it
+                    // First, get the drive (document library)
+                    const driveEndpoint = `https://graph.microsoft.com/v1.0/sites/${siteId}/drive`;
+                    const driveResponse = await fetch(driveEndpoint, {
+                        headers: {
+                            'Authorization': `Bearer ${response.accessToken}`
+                        }
+                    });
+                    
+                    if (driveResponse.ok) {
+                        const driveData = await driveResponse.json();
+                        const driveId = driveData.id;
+                        
+                        // Try to upload to folder using folder ID
+                        // Format: /sites/{siteId}/drives/{driveId}/items/{folderId}:/{filename}:/content
+                        graphEndpoint = `https://graph.microsoft.com/v1.0/sites/${siteId}/drives/${driveId}/items/${folderId}:/${filename}:/content`;
+                    } else {
+                        // Fallback to path-based approach
+                        const filePath = `${libraryName}/${filename}`;
+                        graphEndpoint = `https://graph.microsoft.com/v1.0/sites/${siteId}/drive/root:/${filePath}:/content`;
+                    }
+                } else {
+                    // Option 2: Use path-based approach (fallback)
+                    const filePath = `${libraryName}/${filename}`;
+                    graphEndpoint = `https://graph.microsoft.com/v1.0/sites/${siteId}/drive/root:/${filePath}:/content`;
+                }
+                
+                // Convert JSON data to string for upload
+                const jsonString = JSON.stringify(jsonData, null, 2);
                 
                 const uploadResponse = await fetch(graphEndpoint, {
                     method: 'PUT',
@@ -2295,7 +2340,7 @@
                         'Authorization': `Bearer ${response.accessToken}`,
                         'Content-Type': 'application/json'
                     },
-                    body: jsonData
+                    body: jsonString
                 });
 
                 if (!uploadResponse.ok) {
